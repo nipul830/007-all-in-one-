@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Prop Demo — V1</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">PROP<span>DEMO</span></div>
+      <nav>
+        <button data-page="home">Home</button>
+        <button data-page="accounts">Accounts</button>
+        <button data-page="dashboard">Dashboard</button>
+        <button data-page="terminal">Terminal</button>
+      </nav>
+      <button id="logout" class="ghost">Logout</button>
+    </header>
+
+    <main>
+      <section id="home" class="page active">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">DEMO PROP-FIRM COMPETITION</p>
+            <h1>Trade. Compete.<br><span>Prove Yourself.</span></h1>
+            <p class="muted">A virtual trading competition with automatic risk rules, account status and leaderboard.</p>
+            <button class="primary" data-page="accounts">Choose Account</button>
+          </div>
+          <div class="hero-card">
+            <div class="status">● DEMO MODE</div>
+            <h3>Risk Engine</h3>
+            <div class="metric"><span>Daily Loss</span><b>Auto</b></div>
+            <div class="metric"><span>Max Drawdown</span><b>Auto</b></div>
+            <div class="metric"><span>Profit Target</span><b>Auto</b></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="accounts" class="page">
+        <div class="section-head">
+          <div><p class="eyebrow">STEP 1</p><h2>Choose your account</h2></div>
+          <span class="badge">100% FREE WITH COUPON</span>
+        </div>
+        <div id="account-grid" class="grid"></div>
+        <div id="coupon-box" class="panel hidden">
+          <h3>Activate account</h3>
+          <p id="selected-plan" class="muted"></p>
+          <label>Coupon code</label>
+          <input id="coupon" placeholder="Try FRIENDS100">
+          <button id="activate" class="primary">Apply Coupon & Activate</button>
+          <p id="coupon-msg" class="msg"></p>
+        </div>
+      </section>
+
+      <section id="dashboard" class="page">
+        <div class="section-head">
+          <div><p class="eyebrow">TRADER DASHBOARD</p><h2 id="account-title">No account</h2></div>
+          <span id="account-status" class="badge">INACTIVE</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span>Balance</span><strong id="balance">$0.00</strong></div>
+          <div class="stat"><span>Equity</span><strong id="equity">$0.00</strong></div>
+          <div class="stat"><span>Total P&L</span><strong id="pnl">$0.00</strong></div>
+          <div class="stat"><span>Drawdown</span><strong id="dd">$0.00</strong></div>
+        </div>
+        <div class="two-col">
+          <div class="panel">
+            <h3>Rules</h3>
+            <div id="rules"></div>
+          </div>
+          <div class="panel">
+            <h3>Account status</h3>
+            <div id="status-detail" class="callout">Activate an account to start.</div>
+            <button class="primary" data-page="terminal">Open Terminal</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="terminal" class="page">
+        <div class="section-head">
+          <div><p class="eyebrow">SIMULATED TERMINAL</p><h2>Trading Desk</h2></div>
+          <span class="badge">VIRTUAL FUNDS</span>
+        </div>
+        <div class="terminal">
+          <div class="chart">
+            <div class="chart-top"><b>EURUSD</b><span>1.17000</span></div>
+            <div class="candles" id="candles"></div>
+          </div>
+          <div class="order-panel">
+            <h3>New Order</h3>
+            <label>Side</label>
+            <select id="side"><option>BUY</option><option>SELL</option></select>
+            <label>Position size</label>
+            <input id="size" type="number" min="0.01" step="0.01" value="0.10">
+            <label>Simulated P&L</label>
+            <input id="trade-pnl" type="number" step="1" value="250">
+            <div class="actions">
+              <button id="buy" class="primary">BUY</button>
+              <button id="sell" class="secondary">SELL</button>
+            </div>
+            <p id="trade-msg" class="msg"></p>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Trade History</h3>
+          <div id="history" class="history-empty">No trades yet.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
