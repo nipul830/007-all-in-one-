@@ -1,38 +1,16 @@
 // =====================================================
-// PROP DEMO V4 - COMPLETE APP.JS
-// =====================================================
-//
-// Features:
-// - Supabase Auth
-// - Account activation
-// - Coupon FRIENDS100
-// - TradingView chart
-// - Twelve Data live market price through Supabase Edge Function
-// - Forex / Gold / Crypto symbols
-// - Virtual BUY / SELL
-// - Optional Stop Loss
-// - Optional Take Profit
-// - Automatic SL / TP close
-// - Manual Close Trade
-// - Live P&L
-// - Open Positions
-// - Trade History
-// - Account Equity
-// - Drawdown
-// - Refresh page stays on current page
-// - Virtual trading only
-//
-// =====================================================
-
-
-// =====================================================
-// SUPABASE
+// PROP DEMO V4
+// LIVE MARKET + VIRTUAL TRADING + OPEN POSITIONS
 // =====================================================
 
 import {
   createClient
 } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
+
+// =====================================================
+// SUPABASE
+// =====================================================
 
 const supabase = createClient(
   SUPABASE_URL,
@@ -51,18 +29,13 @@ const supabase = createClient(
 // CONFIG
 // =====================================================
 
-const FUNCTION_NAME =
-  "clever-function";
+const FUNCTION_NAME = "clever-function";
 
-
-// Live quote polling.
-// Keep this around 10-15 seconds with a free API quota.
-const MARKET_REFRESH_MS =
-  10000;
+const MARKET_REFRESH_MS = 15000;
 
 
 // =====================================================
-// ACCOUNT PLANS
+// PLANS
 // =====================================================
 
 const PLANS = [
@@ -115,114 +88,93 @@ const PLANS = [
 
 
 // =====================================================
-// MARKET SYMBOLS
+// SUPPORTED SYMBOLS
 // =====================================================
 
 const SYMBOLS = [
 
-  // -----------------------------
-  // FOREX
-  // -----------------------------
-
   {
-    symbol: "EUR/USD",
-    tv: "FX:EURUSD",
-    category: "Forex",
-    name: "Euro / US Dollar"
+    value: "EUR/USD",
+    label: "EUR/USD",
+    type: "forex",
+    contract: 100000
   },
 
   {
-    symbol: "GBP/USD",
-    tv: "FX:GBPUSD",
-    category: "Forex",
-    name: "British Pound / US Dollar"
+    value: "GBP/USD",
+    label: "GBP/USD",
+    type: "forex",
+    contract: 100000
   },
 
   {
-    symbol: "USD/JPY",
-    tv: "FX:USDJPY",
-    category: "Forex",
-    name: "US Dollar / Japanese Yen"
+    value: "USD/JPY",
+    label: "USD/JPY",
+    type: "forex",
+    contract: 100000
   },
 
   {
-    symbol: "USD/CHF",
-    tv: "FX:USDCHF",
-    category: "Forex",
-    name: "US Dollar / Swiss Franc"
+    value: "USD/CHF",
+    label: "USD/CHF",
+    type: "forex",
+    contract: 100000
   },
 
   {
-    symbol: "AUD/USD",
-    tv: "FX:AUDUSD",
-    category: "Forex",
-    name: "Australian Dollar / US Dollar"
+    value: "AUD/USD",
+    label: "AUD/USD",
+    type: "forex",
+    contract: 100000
   },
 
   {
-    symbol: "USD/CAD",
-    tv: "FX:USDCAD",
-    category: "Forex",
-    name: "US Dollar / Canadian Dollar"
+    value: "USD/CAD",
+    label: "USD/CAD",
+    type: "forex",
+    contract: 100000
   },
 
   {
-    symbol: "NZD/USD",
-    tv: "FX:NZDUSD",
-    category: "Forex",
-    name: "New Zealand Dollar / US Dollar"
-  },
-
-
-  // -----------------------------
-  // GOLD / METALS
-  // -----------------------------
-
-  {
-    symbol: "XAU/USD",
-    tv: "OANDA:XAUUSD",
-    category: "Gold",
-    name: "Gold / US Dollar"
+    value: "NZD/USD",
+    label: "NZD/USD",
+    type: "forex",
+    contract: 100000
   },
 
   {
-    symbol: "XAG/USD",
-    tv: "OANDA:XAGUSD",
-    category: "Metals",
-    name: "Silver / US Dollar"
-  },
-
-
-  // -----------------------------
-  // CRYPTO
-  // -----------------------------
-
-  {
-    symbol: "BTC/USD",
-    tv: "COINBASE:BTCUSD",
-    category: "Crypto",
-    name: "Bitcoin / US Dollar"
+    value: "XAU/USD",
+    label: "XAU/USD",
+    type: "gold",
+    contract: 100
   },
 
   {
-    symbol: "ETH/USD",
-    tv: "COINBASE:ETHUSD",
-    category: "Crypto",
-    name: "Ethereum / US Dollar"
+    value: "XAG/USD",
+    label: "XAG/USD",
+    type: "metal",
+    contract: 5000
   },
 
   {
-    symbol: "SOL/USD",
-    tv: "COINBASE:SOLUSD",
-    category: "Crypto",
-    name: "Solana / US Dollar"
+    value: "BTC/USD",
+    label: "BTC/USD",
+    type: "crypto",
+    contract: 1
   },
 
   {
-    symbol: "XRP/USD",
-    tv: "COINBASE:XRPUSD",
-    category: "Crypto",
-    name: "XRP / US Dollar"
+    value: "ETH/USD",
+    label: "ETH/USD",
+    type: "crypto",
+    contract: 1
+  },
+
+  {
+    value: "SOL/USD",
+    label: "SOL/USD",
+    type: "crypto",
+    contract: 1
   }
 
 ];
@@ -232,257 +184,142 @@ const SYMBOLS = [
 // STATE
 // =====================================================
 
-let currentUser =
-  null;
+let currentUser = null;
 
-let currentAccount =
-  null;
+let currentAccount = null;
 
-let selectedPlan =
-  null;
+let selectedPlan = null;
 
-let trades =
-  [];
+let trades = [];
 
-let marketTimer =
-  null;
+let openTrades = [];
 
-let currentMarket =
-  null;
+let marketPrices = {};
 
-let lastTerminalSymbol =
-  "EUR/USD";
+let marketTimer = null;
 
-let loginMode =
-  false;
+let currentPage = "auth";
+
+let loginMode = false;
 
 
 // =====================================================
-// DOM HELPER
+// HELPERS
 // =====================================================
 
 function $(id) {
-
   return document.getElementById(id);
-
 }
 
 
-// =====================================================
-// MONEY
-// =====================================================
-
 function money(value) {
 
-  const number =
-    Number(value || 0);
-
-  return number.toLocaleString(
+  return Number(
+    value || 0
+  ).toLocaleString(
     "en-US",
     {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 2
     }
   );
 
 }
 
 
-// =====================================================
-// NUMBER
-// =====================================================
+function number(value, decimals = 5) {
 
-function safeNumber(
-  value,
-  fallback = 0
-) {
+  const n = Number(value);
 
-  if (
-    value === null ||
-    value === undefined ||
-    String(value).trim() === ""
-  ) {
-
-    return fallback;
-
+  if (!Number.isFinite(n)) {
+    return "0";
   }
 
-  const number =
-    Number(value);
-
-  return Number.isFinite(number)
-    ? number
-    : fallback;
+  return n.toFixed(decimals);
 
 }
 
 
-// =====================================================
-// SYMBOL INFO
-// =====================================================
+function escapeHTML(value) {
 
-function getSymbolInfo(
-  symbol
-) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+function getSymbolInfo(symbol) {
 
   return (
     SYMBOLS.find(
       item =>
-        item.symbol === symbol
-    )
-    ||
+        item.value === symbol
+    ) ||
     {
-      symbol,
-      tv: "",
-      category: "Market",
-      name: symbol
+      value: symbol,
+      label: symbol,
+      type: "other",
+      contract: 1
     }
   );
 
 }
 
 
-// =====================================================
-// PRICE DECIMALS
-// =====================================================
-
-function priceDecimals(
-  symbol
-) {
-
-  const s =
-    String(symbol || "")
-      .toUpperCase();
-
+function getDecimals(symbol) {
 
   if (
-    s.includes("JPY")
+    symbol === "USD/JPY"
   ) {
-
     return 3;
-
   }
-
 
   if (
-    s.includes("XAU") ||
-    s.includes("XAG")
+    symbol === "BTC/USD" ||
+    symbol === "ETH/USD" ||
+    symbol === "SOL/USD"
   ) {
-
     return 2;
-
   }
-
 
   if (
-    s.includes("BTC") ||
-    s.includes("ETH") ||
-    s.includes("SOL") ||
-    s.includes("XRP")
+    symbol === "XAU/USD"
   ) {
-
     return 2;
-
   }
-
 
   return 5;
 
 }
 
 
-// =====================================================
-// FORMAT PRICE
-// =====================================================
-
-function formatPrice(
-  value,
-  symbol
-) {
-
-  const number =
-    Number(value);
-
+function createId() {
 
   if (
-    !Number.isFinite(number)
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
   ) {
 
-    return "-";
+    return crypto.randomUUID();
 
   }
 
-
-  return number.toLocaleString(
-    "en-US",
-    {
-      minimumFractionDigits:
-        priceDecimals(symbol),
-
-      maximumFractionDigits:
-        priceDecimals(symbol)
-    }
+  return (
+    Date.now().toString(36) +
+    Math.random().toString(36).slice(2)
   );
 
 }
 
 
-// =====================================================
-// MESSAGE
-// =====================================================
+function showPage(pageId) {
 
-function setMessage(
-  id,
-  message,
-  success = false
-) {
-
-  const el =
-    $(id);
-
-
-  if (!el) {
-
-    return;
-
-  }
-
-
-  el.textContent =
-    message;
-
-
-  el.style.color =
-    success
-      ? "var(--green)"
-      : "var(--muted)";
-
-}
-
-
-// =====================================================
-// PAGE STORAGE
-// =====================================================
-
-function pageStorageKey() {
-
-  return currentUser
-    ? `propdemo_page_${currentUser.id}`
-    : "propdemo_page";
-
-}
-
-
-// =====================================================
-// SHOW PAGE
-// =====================================================
-
-function showPage(
-  pageId,
-  save = true
-) {
+  currentPage = pageId;
 
   document
     .querySelectorAll(".page")
@@ -497,92 +334,205 @@ function showPage(
     );
 
 
-  const page =
-    $(pageId);
+  const page = $(pageId);
 
+  if (page) {
 
-  if (!page) {
-
-    return;
-
-  }
-
-
-  page.classList.add(
-    "active"
-  );
-
-
-  if (save) {
-
-    localStorage.setItem(
-      pageStorageKey(),
-      pageId
+    page.classList.add(
+      "active"
     );
 
   }
 
 
-  if (
-    pageId === "dashboard"
-  ) {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 
-    renderDashboard();
+}
+
+
+function setMessage(
+  id,
+  message,
+  success = false
+) {
+
+  const el = $(id);
+
+  if (!el) {
+    return;
+  }
+
+  el.textContent = message;
+
+  el.style.color =
+    success
+      ? "var(--green)"
+      : "var(--muted)";
+
+}
+
+
+// =====================================================
+// STORAGE KEYS
+// =====================================================
+
+function accountStorageKey() {
+
+  return currentUser
+    ? `propdemo_account_${currentUser.id}`
+    : "propdemo_account";
+
+}
+
+
+function tradesStorageKey() {
+
+  return currentUser
+    ? `propdemo_trades_${currentUser.id}`
+    : "propdemo_trades";
+
+}
+
+
+function openTradesStorageKey() {
+
+  return currentUser
+    ? `propdemo_open_trades_${currentUser.id}`
+    : "propdemo_open_trades";
+
+}
+
+
+// =====================================================
+// STORAGE
+// =====================================================
+
+function saveAccount() {
+
+  if (!currentAccount) {
+    return;
+  }
+
+  localStorage.setItem(
+    accountStorageKey(),
+    JSON.stringify(
+      currentAccount
+    )
+  );
+
+}
+
+
+function loadAccount() {
+
+  const raw =
+    localStorage.getItem(
+      accountStorageKey()
+    );
+
+  if (!raw) {
+
+    currentAccount = null;
+
+    return;
 
   }
 
+  try {
 
-  if (
-    pageId === "terminal"
-  ) {
+    currentAccount =
+      JSON.parse(raw);
 
-    loadTerminal();
+  } catch {
 
-  }
-
-
-  if (
-    pageId === "home"
-  ) {
-
-    updateHomePrice();
+    currentAccount = null;
 
   }
 
 }
 
 
-// =====================================================
-// GET LAST PAGE
-// =====================================================
+function saveTrades() {
 
-function getLastPage() {
+  localStorage.setItem(
+    tradesStorageKey(),
+    JSON.stringify(
+      trades
+    )
+  );
 
-  const page =
+}
+
+
+function loadTrades() {
+
+  const raw =
     localStorage.getItem(
-      pageStorageKey()
+      tradesStorageKey()
     );
 
+  if (!raw) {
 
-  const valid =
-    [
-      "home",
-      "accounts",
-      "dashboard",
-      "terminal"
-    ];
+    trades = [];
 
-
-  if (
-    valid.includes(page)
-  ) {
-
-    return page;
+    return;
 
   }
 
+  try {
 
-  return "home";
+    trades =
+      JSON.parse(raw);
+
+  } catch {
+
+    trades = [];
+
+  }
+
+}
+
+
+function saveOpenTrades() {
+
+  localStorage.setItem(
+    openTradesStorageKey(),
+    JSON.stringify(
+      openTrades
+    )
+  );
+
+}
+
+
+function loadOpenTrades() {
+
+  const raw =
+    localStorage.getItem(
+      openTradesStorageKey()
+    );
+
+  if (!raw) {
+
+    openTrades = [];
+
+    return;
+
+  }
+
+  try {
+
+    openTrades =
+      JSON.parse(raw);
+
+  } catch {
+
+    openTrades = [];
+
+  }
 
 }
 
@@ -600,42 +550,62 @@ document.addEventListener(
         "[data-page]"
       );
 
-
     if (!button) {
-
       return;
-
     }
-
 
     const page =
       button.dataset.page;
-
 
     if (
       !currentUser &&
       page !== "auth"
     ) {
 
-      showPage(
-        "auth"
-      );
-
+      showPage("auth");
 
       setMessage(
         "auth-msg",
         "Please login first."
       );
 
-
       return;
 
     }
 
+    showPage(page);
 
-    showPage(
-      page
-    );
+    if (
+      page === "accounts"
+    ) {
+
+      renderPlans();
+
+    }
+
+    if (
+      page === "dashboard"
+    ) {
+
+      renderDashboard();
+
+    }
+
+    if (
+      page === "terminal"
+    ) {
+
+      loadTerminal();
+
+    }
+
+    if (
+      page === "home"
+    ) {
+
+      updateHomePrice();
+
+    }
 
   }
 );
@@ -659,32 +629,25 @@ function updateAuthUI() {
   const fields =
     $("signup-fields");
 
-
   if (
     !title ||
     !submit ||
     !toggle ||
     !fields
   ) {
-
     return;
-
   }
-
 
   if (loginMode) {
 
     title.textContent =
       "Welcome back";
 
-
     submit.textContent =
       "Login";
 
-
     toggle.textContent =
       "Don't have an account? Create one";
-
 
     fields.style.display =
       "none";
@@ -694,14 +657,11 @@ function updateAuthUI() {
     title.textContent =
       "Create your trader account";
 
-
     submit.textContent =
       "Create account";
 
-
     toggle.textContent =
       "Already have an account? Login";
-
 
     fields.style.display =
       "block";
@@ -711,264 +671,215 @@ function updateAuthUI() {
 }
 
 
+$("auth-toggle")?.addEventListener(
+  "click",
+  () => {
+
+    loginMode =
+      !loginMode;
+
+    setMessage(
+      "auth-msg",
+      ""
+    );
+
+    updateAuthUI();
+
+  }
+);
+
+
 // =====================================================
-// AUTH TOGGLE
+// LOGIN / SIGNUP
 // =====================================================
 
-$("auth-toggle")
-  ?.addEventListener(
-    "click",
-    () => {
+$("auth-submit")?.addEventListener(
+  "click",
+  async () => {
 
-      loginMode =
-        !loginMode;
+    const email =
+      $("auth-email")
+        ?.value
+        .trim();
 
+    const password =
+      $("auth-password")
+        ?.value;
+
+    const name =
+      $("auth-name")
+        ?.value
+        .trim();
+
+    if (
+      !email ||
+      !password
+    ) {
 
       setMessage(
         "auth-msg",
-        ""
+        "Email and password required."
       );
 
-
-      updateAuthUI();
+      return;
 
     }
-  );
 
-
-// =====================================================
-// SIGNUP / LOGIN
-// =====================================================
-
-$("auth-submit")
-  ?.addEventListener(
-    "click",
-    async () => {
-
-      const email =
-        $("auth-email")
-          ?.value
-          .trim();
-
-
-      const password =
-        $("auth-password")
-          ?.value;
-
-
-      const name =
-        $("auth-name")
-          ?.value
-          .trim();
-
-
-      if (
-        !email ||
-        !password
-      ) {
-
-        setMessage(
-          "auth-msg",
-          "Email and password required."
-        );
-
-
-        return;
-
-      }
-
-
-      if (
-        password.length < 6
-      ) {
-
-        setMessage(
-          "auth-msg",
-          "Password must be at least 6 characters."
-        );
-
-
-        return;
-
-      }
-
+    if (
+      password.length < 6
+    ) {
 
       setMessage(
         "auth-msg",
-        "Please wait..."
+        "Password must be at least 6 characters."
       );
 
+      return;
 
-      try {
+    }
 
-        if (loginMode) {
+    setMessage(
+      "auth-msg",
+      "Please wait..."
+    );
 
-          const {
-            data,
-            error
-          } =
-            await supabase
-              .auth
-              .signInWithPassword(
-                {
-                  email,
-                  password
+    try {
+
+      if (loginMode) {
+
+        const {
+          data,
+          error
+        } =
+          await supabase
+            .auth
+            .signInWithPassword({
+              email,
+              password
+            });
+
+        if (error) {
+          throw error;
+        }
+
+        currentUser =
+          data.user;
+
+        setMessage(
+          "auth-msg",
+          "Login successful.",
+          true
+        );
+
+        await startApp();
+
+      } else {
+
+        const {
+          data,
+          error
+        } =
+          await supabase
+            .auth
+            .signUp({
+
+              email,
+
+              password,
+
+              options: {
+                data: {
+                  full_name:
+                    name
                 }
-              );
+              }
 
+            });
 
-          if (error) {
+        if (error) {
+          throw error;
+        }
 
-            throw error;
-
-          }
-
-
-          currentUser =
-            data.user;
-
+        if (!data.session) {
 
           setMessage(
             "auth-msg",
-            "Login successful.",
+            "Account created. Check your email to confirm your account.",
             true
           );
 
-
-          await startApp();
-
-
-        } else {
-
-          const {
-            data,
-            error
-          } =
-            await supabase
-              .auth
-              .signUp(
-                {
-                  email,
-                  password,
-
-                  options: {
-                    data: {
-                      full_name:
-                        name
-                    }
-                  }
-                }
-              );
-
-
-          if (error) {
-
-            throw error;
-
-          }
-
-
-          if (
-            !data.session
-          ) {
-
-            setMessage(
-              "auth-msg",
-              "Account created. Check your email to confirm your account.",
-              true
-            );
-
-
-            return;
-
-          }
-
-
-          currentUser =
-            data.user;
-
-
-          await startApp();
+          return;
 
         }
 
-      } catch (error) {
+        currentUser =
+          data.user;
 
-        console.error(
-          error
-        );
-
-
-        setMessage(
-          "auth-msg",
-          error.message ||
-          "Authentication failed."
-        );
+        await startApp();
 
       }
 
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      setMessage(
+        "auth-msg",
+        error.message ||
+        "Authentication failed."
+      );
+
     }
-  );
+
+  }
+);
 
 
 // =====================================================
 // LOGOUT
 // =====================================================
 
-$("logout")
-  ?.addEventListener(
-    "click",
-    async () => {
+$("logout")?.addEventListener(
+  "click",
+  async () => {
 
-      if (marketTimer) {
+    if (marketTimer) {
 
-        clearInterval(
-          marketTimer
-        );
-
-        marketTimer =
-          null;
-
-      }
-
-
-      await supabase
-        .auth
-        .signOut();
-
-
-      currentUser =
-        null;
-
-
-      currentAccount =
-        null;
-
-
-      selectedPlan =
-        null;
-
-
-      trades =
-        [];
-
-
-      currentMarket =
-        null;
-
-
-      showPage(
-        "auth"
+      clearInterval(
+        marketTimer
       );
 
-
-      setMessage(
-        "auth-msg",
-        "Logged out."
-      );
+      marketTimer = null;
 
     }
-  );
+
+    await supabase
+      .auth
+      .signOut();
+
+    currentUser = null;
+
+    currentAccount = null;
+
+    selectedPlan = null;
+
+    trades = [];
+
+    openTrades = [];
+
+    marketPrices = {};
+
+    showPage("auth");
+
+    setMessage(
+      "auth-msg",
+      "Logged out."
+    );
+
+  }
+);
 
 
 // =====================================================
@@ -980,13 +891,9 @@ function renderPlans() {
   const grid =
     $("account-grid");
 
-
   if (!grid) {
-
     return;
-
   }
-
 
   grid.innerHTML =
     PLANS
@@ -996,11 +903,11 @@ function renderPlans() {
           <div class="account panel">
 
             <p class="eyebrow">
-              ${plan.name}
+              ${escapeHTML(plan.name)}
             </p>
 
             <h3>
-              ${plan.size}
+              ${escapeHTML(plan.size)}
             </h3>
 
             <div class="size">
@@ -1008,7 +915,7 @@ function renderPlans() {
             </div>
 
             <div class="price">
-              ${plan.price}
+              ${escapeHTML(plan.price)}
             </div>
 
             <ul>
@@ -1054,10 +961,6 @@ function renderPlans() {
 }
 
 
-// =====================================================
-// SELECT PLAN
-// =====================================================
-
 document.addEventListener(
   "click",
   event => {
@@ -1067,17 +970,12 @@ document.addEventListener(
         "[data-select-plan]"
       );
 
-
     if (!button) {
-
       return;
-
     }
-
 
     const planId =
       button.dataset.selectPlan;
-
 
     selectedPlan =
       PLANS.find(
@@ -1086,27 +984,23 @@ document.addEventListener(
           planId
       );
 
-
     if (!selectedPlan) {
-
       return;
-
     }
-
 
     $("coupon-box")
       ?.classList
       .remove("hidden");
 
+    const selected =
+      $("selected-plan");
 
-    if ($("selected-plan")) {
+    if (selected) {
 
-      $("selected-plan")
-        .textContent =
+      selected.textContent =
         `${selectedPlan.name} — ${selectedPlan.size} — ${money(selectedPlan.balance)} virtual balance`;
 
     }
-
 
     $("coupon")
       ?.focus();
@@ -1119,332 +1013,207 @@ document.addEventListener(
 // ACTIVATE ACCOUNT
 // =====================================================
 
-$("activate")
-  ?.addEventListener(
-    "click",
-    async () => {
+$("activate")?.addEventListener(
+  "click",
+  async () => {
 
-      if (!currentUser) {
+    if (!currentUser) {
 
-        showPage(
-          "auth"
-        );
+      showPage("auth");
 
+      return;
 
-        return;
+    }
 
-      }
-
-
-      if (!selectedPlan) {
-
-        setMessage(
-          "coupon-msg",
-          "Select an account first."
-        );
-
-
-        return;
-
-      }
-
-
-      const coupon =
-        $("coupon")
-          ?.value
-          .trim()
-          .toUpperCase();
-
-
-      if (
-        coupon !==
-        "FRIENDS100"
-      ) {
-
-        setMessage(
-          "coupon-msg",
-          "Invalid coupon code."
-        );
-
-
-        return;
-
-      }
-
-
-      currentAccount = {
-
-        planId:
-          selectedPlan.id,
-
-        planName:
-          selectedPlan.name,
-
-        balance:
-          selectedPlan.balance,
-
-        equity:
-          selectedPlan.balance,
-
-        pnl:
-          0,
-
-        drawdown:
-          0,
-
-        status:
-          "ACTIVE",
-
-        activatedAt:
-          new Date()
-            .toISOString(),
-
-        rules: {
-
-          target:
-            selectedPlan.target,
-
-          dailyLoss:
-            selectedPlan.dailyLoss,
-
-          maxDrawdown:
-            selectedPlan.drawdown
-
-        }
-
-      };
-
-
-      saveAccount();
-
+    if (!selectedPlan) {
 
       setMessage(
         "coupon-msg",
-        "Account activated successfully!",
-        true
+        "Select an account first."
       );
 
-
-      renderDashboard();
-
-
-      setTimeout(
-        () => {
-
-          showPage(
-            "dashboard"
-          );
-
-        },
-        300
-      );
-
-    }
-  );
-
-
-// =====================================================
-// STORAGE KEYS
-// =====================================================
-
-function accountStorageKey() {
-
-  return currentUser
-    ? `propdemo_account_${currentUser.id}`
-    : "propdemo_account";
-
-}
-
-
-function tradesStorageKey() {
-
-  return currentUser
-    ? `propdemo_trades_${currentUser.id}`
-    : "propdemo_trades";
-
-}
-
-
-// =====================================================
-// ACCOUNT STORAGE
-// =====================================================
-
-function saveAccount() {
-
-  if (!currentAccount) {
-
-    return;
-
-  }
-
-
-  localStorage.setItem(
-    accountStorageKey(),
-    JSON.stringify(
-      currentAccount
-    )
-  );
-
-}
-
-
-function loadAccount() {
-
-  const raw =
-    localStorage.getItem(
-      accountStorageKey()
-    );
-
-
-  if (!raw) {
-
-    currentAccount =
-      null;
-
-    return;
-
-  }
-
-
-  try {
-
-    currentAccount =
-      JSON.parse(
-        raw
-      );
-
-  } catch {
-
-    currentAccount =
-      null;
-
-  }
-
-}
-
-
-// =====================================================
-// TRADE STORAGE
-// =====================================================
-
-function saveTrades() {
-
-  localStorage.setItem(
-    tradesStorageKey(),
-    JSON.stringify(
-      trades
-    )
-  );
-
-}
-
-
-function loadTrades() {
-
-  const raw =
-    localStorage.getItem(
-      tradesStorageKey()
-    );
-
-
-  if (!raw) {
-
-    trades =
-      [];
-
-    return;
-
-  }
-
-
-  try {
-
-    trades =
-      JSON.parse(
-        raw
-      );
-
-
-    if (!Array.isArray(trades)) {
-
-      trades =
-        [];
+      return;
 
     }
 
-  } catch {
+    const coupon =
+      $("coupon")
+        ?.value
+        .trim()
+        .toUpperCase();
 
-    trades =
-      [];
+    if (
+      coupon !==
+      "FRIENDS100"
+    ) {
+
+      setMessage(
+        "coupon-msg",
+        "Invalid coupon code."
+      );
+
+      return;
+
+    }
+
+    currentAccount = {
+
+      planId:
+        selectedPlan.id,
+
+      planName:
+        selectedPlan.name,
+
+      balance:
+        selectedPlan.balance,
+
+      equity:
+        selectedPlan.balance,
+
+      pnl:
+        0,
+
+      drawdown:
+        0,
+
+      status:
+        "ACTIVE",
+
+      activatedAt:
+        new Date()
+          .toISOString(),
+
+      rules: {
+
+        target:
+          selectedPlan.target,
+
+        dailyLoss:
+          selectedPlan.dailyLoss,
+
+        maxDrawdown:
+          selectedPlan.drawdown
+
+      }
+
+    };
+
+    trades = [];
+
+    openTrades = [];
+
+    saveAccount();
+    saveTrades();
+    saveOpenTrades();
+
+    setMessage(
+      "coupon-msg",
+      "Account activated successfully!",
+      true
+    );
+
+    renderDashboard();
+
+    setTimeout(
+      () => {
+
+        showPage(
+          "dashboard"
+        );
+
+      },
+      400
+    );
 
   }
-
-}
+);
 
 
 // =====================================================
 // DASHBOARD
 // =====================================================
 
+function calculateUnrealizedPnL() {
+
+  return openTrades.reduce(
+    (
+      total,
+      trade
+    ) => {
+
+      return (
+        total +
+        getTradePnL(
+          trade
+        )
+      );
+
+    },
+    0
+  );
+
+}
+
+
+function refreshAccountEquity() {
+
+  if (!currentAccount) {
+    return;
+  }
+
+  const unrealized =
+    calculateUnrealizedPnL();
+
+  currentAccount.equity =
+    currentAccount.balance +
+    currentAccount.pnl +
+    unrealized;
+
+  currentAccount.drawdown =
+    Math.max(
+      0,
+      currentAccount.balance -
+      currentAccount.equity
+    );
+
+  saveAccount();
+
+}
+
+
 function renderDashboard() {
-
-  const title =
-    $("account-title");
-
-
-  const status =
-    $("account-status");
-
 
   if (!currentAccount) {
 
-    if (title) {
-
-      title.textContent =
+    if ($("account-title")) {
+      $("account-title").textContent =
         "No account";
-
     }
 
-
-    if (status) {
-
-      status.textContent =
+    if ($("account-status")) {
+      $("account-status").textContent =
         "INACTIVE";
-
     }
-
 
     if ($("balance")) {
-
       $("balance").textContent =
         "$0.00";
-
     }
-
 
     if ($("equity")) {
-
       $("equity").textContent =
         "$0.00";
-
     }
-
 
     if ($("pnl")) {
-
       $("pnl").textContent =
         "$0.00";
-
     }
-
 
     if ($("dd")) {
-
       $("dd").textContent =
         "$0.00";
-
     }
-
 
     if ($("rules")) {
 
@@ -1456,7 +1225,6 @@ function renderDashboard() {
 
     }
 
-
     if ($("status-detail")) {
 
       $("status-detail").textContent =
@@ -1464,117 +1232,149 @@ function renderDashboard() {
 
     }
 
-
     return;
 
   }
 
+  refreshAccountEquity();
 
-  title.textContent =
-    `${currentAccount.planName} Account`;
+  if ($("account-title")) {
 
+    $("account-title").textContent =
+      `${currentAccount.planName} Account`;
 
-  status.textContent =
-    currentAccount.status;
+  }
 
+  if ($("account-status")) {
 
-  $("balance").textContent =
-    money(
-      currentAccount.balance
-    );
+    $("account-status").textContent =
+      currentAccount.status;
 
+  }
 
-  $("equity").textContent =
-    money(
-      currentAccount.equity
-    );
+  if ($("balance")) {
 
+    $("balance").textContent =
+      money(
+        currentAccount.balance
+      );
 
-  $("pnl").textContent =
-    money(
-      currentAccount.pnl
-    );
+  }
 
+  if ($("equity")) {
 
-  $("dd").textContent =
-    money(
-      currentAccount.drawdown
-    );
+    $("equity").textContent =
+      money(
+        currentAccount.equity
+      );
 
+  }
 
-  $("rules").innerHTML = `
+  if ($("pnl")) {
 
-    <div class="rule">
+    $("pnl").textContent =
+      money(
+        currentAccount.pnl +
+        calculateUnrealizedPnL()
+      );
 
-      <span>
-        Profit Target
-      </span>
+  }
 
-      <b>
-        ${currentAccount.rules.target}%
-      </b>
+  if ($("dd")) {
 
-    </div>
+    $("dd").textContent =
+      money(
+        currentAccount.drawdown
+      );
 
+  }
 
-    <div class="rule">
+  if ($("rules")) {
 
-      <span>
-        Daily Loss Limit
-      </span>
+    $("rules").innerHTML = `
 
-      <b>
-        ${currentAccount.rules.dailyLoss}%
-      </b>
+      <div class="rule">
 
-    </div>
+        <span>
+          Profit Target
+        </span>
 
+        <b>
+          ${currentAccount.rules.target}%
+        </b>
 
-    <div class="rule">
+      </div>
 
-      <span>
-        Maximum Drawdown
-      </span>
+      <div class="rule">
 
-      <b>
-        ${currentAccount.rules.maxDrawdown}%
-      </b>
+        <span>
+          Daily Loss Limit
+        </span>
 
-    </div>
+        <b>
+          ${currentAccount.rules.dailyLoss}%
+        </b>
 
+      </div>
 
-    <div class="rule">
+      <div class="rule">
 
-      <span>
-        Trading Mode
-      </span>
+        <span>
+          Maximum Drawdown
+        </span>
 
-      <b class="green">
-        VIRTUAL
-      </b>
+        <b>
+          ${currentAccount.rules.maxDrawdown}%
+        </b>
 
-    </div>
+      </div>
 
-  `;
+      <div class="rule">
 
+        <span>
+          Trading Mode
+        </span>
 
-  $("status-detail").innerHTML = `
+        <b class="green">
+          VIRTUAL
+        </b>
 
-    <strong class="green">
-      ACTIVE
-    </strong>
+      </div>
 
-    <br>
+    `;
 
-    Account:
-    ${currentAccount.planName}
+  }
 
-    <br>
+  if ($("status-detail")) {
 
-    Virtual Balance:
-    ${money(currentAccount.balance)}
+    $("status-detail").innerHTML = `
 
-  `;
+      <strong class="green">
+        ACTIVE
+      </strong>
+
+      <br>
+
+      Account:
+      ${escapeHTML(
+        currentAccount.planName
+      )}
+
+      <br>
+
+      Virtual Balance:
+      ${money(
+        currentAccount.balance
+      )}
+
+      <br>
+
+      Open Positions:
+      ${openTrades.length}
+
+    `;
+
+  }
 
 }
 
@@ -1583,102 +1383,62 @@ function renderDashboard() {
 // TRADINGVIEW CHART
 // =====================================================
 
-function loadTradingViewChart(
-  symbol = lastTerminalSymbol
-) {
+function loadTradingViewChart() {
 
   const container =
     $("tradingview-widget");
 
-
   if (!container) {
-
     return;
-
   }
 
-
-  const info =
-    getSymbolInfo(
-      symbol
-    );
-
-
-  container.innerHTML =
-    "";
-
-
-  container.style.position =
-    "relative";
-
-
-  container.style.width =
-    "100%";
-
-
-  container.style.height =
-    "100%";
-
+  container.innerHTML = "";
 
   const wrapper =
     document.createElement(
       "div"
     );
 
-
   wrapper.className =
     "tradingview-widget-container";
-
 
   wrapper.style.width =
     "100%";
 
-
   wrapper.style.height =
     "100%";
-
 
   const widget =
     document.createElement(
       "div"
     );
 
-
   widget.className =
     "tradingview-widget-container__widget";
-
 
   widget.style.width =
     "100%";
 
-
   widget.style.height =
     "100%";
-
 
   wrapper.appendChild(
     widget
   );
 
-
   container.appendChild(
     wrapper
   );
-
 
   const script =
     document.createElement(
       "script"
     );
 
-
   script.src =
     "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
 
-
-  script.async =
-    true;
-
+  script.async = true;
 
   script.innerHTML =
     JSON.stringify({
@@ -1687,7 +1447,10 @@ function loadTradingViewChart(
         true,
 
       symbol:
-        info.tv,
+        getTradingViewSymbol(
+          $("symbol")?.value ||
+          "EUR/USD"
+        ),
 
       interval:
         "5",
@@ -1724,181 +1487,150 @@ function loadTradingViewChart(
 
     });
 
-
   wrapper.appendChild(
     script
   );
 
-
-  // Small virtual trading overlay.
-  const overlay =
-    document.createElement(
-      "div"
-    );
+}
 
 
-  overlay.id =
-    "chart-trade-overlay";
+function getTradingViewSymbol(
+  symbol
+) {
 
+  const map = {
 
-  overlay.style.position =
-    "absolute";
+    "EUR/USD":
+      "FX:EURUSD",
 
+    "GBP/USD":
+      "FX:GBPUSD",
 
-  overlay.style.top =
-    "12px";
+    "USD/JPY":
+      "FX:USDJPY",
 
+    "USD/CHF":
+      "FX:USDCHF",
 
-  overlay.style.left =
-    "12px";
+    "AUD/USD":
+      "FX:AUDUSD",
 
+    "USD/CAD":
+      "FX:USDCAD",
 
-  overlay.style.zIndex =
-    "10";
+    "NZD/USD":
+      "FX:NZDUSD",
 
+    "XAU/USD":
+      "OANDA:XAUUSD",
 
-  overlay.style.pointerEvents =
-    "none";
+    "XAG/USD":
+      "OANDA:XAGUSD",
 
+    "BTC/USD":
+      "COINBASE:BTCUSD",
 
-  overlay.style.background =
-    "rgba(9,11,16,.88)";
+    "ETH/USD":
+      "COINBASE:ETHUSD",
 
+    "SOL/USD":
+      "COINBASE:SOLUSD"
 
-  overlay.style.border =
-    "1px solid #242b36";
+  };
 
-
-  overlay.style.borderRadius =
-    "10px";
-
-
-  overlay.style.padding =
-    "8px 10px";
-
-
-  overlay.style.fontSize =
-    "11px";
-
-
-  overlay.style.color =
-    "#eef2f7";
-
-
-  overlay.innerHTML =
-    `
-      <div style="font-weight:800">
-        ${symbol}
-      </div>
-
-      <div id="chart-overlay-price"
-           style="color:#63d29a;margin-top:3px">
-        Live: --
-      </div>
-
-      <div id="chart-overlay-pnl"
-           style="margin-top:3px">
-        P&L: --
-      </div>
-    `;
-
-
-  container.appendChild(
-    overlay
+  return (
+    map[symbol] ||
+    "FX:EURUSD"
   );
 
-
-  updateChartOverlay();
-
 }
 
 
 // =====================================================
-// CHART OVERLAY
+// CHART FULLSCREEN
 // =====================================================
 
-function updateChartOverlay() {
+function enableChartFullscreen() {
 
-  const priceEl =
-    $("chart-overlay-price");
+  const container =
+    $("tradingview-widget");
 
-  const pnlEl =
-    $("chart-overlay-pnl");
-
-
-  if (!priceEl && !pnlEl) {
-
+  if (!container) {
     return;
-
   }
 
+  const chartBox =
+    container.closest(
+      ".chart"
+    );
+
+  if (!chartBox) {
+    return;
+  }
 
   if (
-    currentMarket &&
-    currentMarket.price
+    $("chart-fullscreen")
   ) {
+    return;
+  }
 
-    if (priceEl) {
+  const button =
+    document.createElement(
+      "button"
+    );
 
-      priceEl.textContent =
-        `Live: ${formatPrice(
-          currentMarket.price,
-          lastTerminalSymbol
-        )}`;
+  button.id =
+    "chart-fullscreen";
+
+  button.className =
+    "secondary";
+
+  button.textContent =
+    "⛶ Full Screen";
+
+  button.style.marginBottom =
+    "10px";
+
+  button.addEventListener(
+    "click",
+    async () => {
+
+      if (
+        !document.fullscreenElement
+      ) {
+
+        try {
+
+          await chartBox.requestFullscreen();
+
+        } catch {
+
+          chartBox.classList.toggle(
+            "chart-expanded"
+          );
+
+        }
+
+      } else {
+
+        await document.exitFullscreen();
+
+      }
 
     }
+  );
 
-  }
-
-
-  const open =
-    trades.filter(
-      trade =>
-        trade.status ===
-        "OPEN"
+  chartBox.parentElement
+    ?.insertBefore(
+      button,
+      chartBox
     );
-
-
-  const relevant =
-    open.filter(
-      trade =>
-        trade.symbol ===
-        lastTerminalSymbol
-    );
-
-
-  const pnl =
-    relevant.reduce(
-      (
-        sum,
-        trade
-      ) =>
-        sum +
-        safeNumber(
-          trade.livePnl
-        ),
-      0
-    );
-
-
-  if (pnlEl) {
-
-    pnlEl.textContent =
-      `P&L: ${money(pnl)}`;
-
-
-    pnlEl.style.color =
-      pnl >= 0
-        ? "var(--green)"
-        : "var(--red)";
-
-  }
 
 }
 
 
 // =====================================================
-// GET MARKET PRICE
+// SUPABASE EDGE FUNCTION
 // =====================================================
 
 async function getMarketPrice(
@@ -1907,7 +1639,6 @@ async function getMarketPrice(
 
   const endpoint =
     `${SUPABASE_URL}/functions/v1/${FUNCTION_NAME}`;
-
 
   const response =
     await fetch(
@@ -1931,15 +1662,16 @@ async function getMarketPrice(
         },
 
         body:
-          "{}"
+          "{}",
+
+        cache:
+          "no-store"
 
       }
     );
 
-
   const data =
     await response.json();
-
 
   if (
     !response.ok ||
@@ -1953,274 +1685,82 @@ async function getMarketPrice(
 
   }
 
-
-  const price =
-    Number(
-      data.price
-    );
-
-
-  if (
-    !Number.isFinite(price)
-  ) {
-
-    throw new Error(
-      "Invalid market price"
-    );
-
-  }
-
-
   return data;
 
 }
 
 
 // =====================================================
-// CURRENT SYMBOL
+// PRICE HELPERS
 // =====================================================
 
-function getSelectedSymbol() {
-
-  return (
-    $("symbol")
-      ?.value
-    ||
-    lastTerminalSymbol
-    ||
-    "EUR/USD"
-  );
-
-}
-
-
-// =====================================================
-// POPULATE SYMBOL SELECT
-// =====================================================
-
-function populateSymbols() {
-
-  const select =
-    $("symbol");
-
-
-  if (!select) {
-
-    return;
-
-  }
-
-
-  const current =
-    select.value ||
-    lastTerminalSymbol ||
-    "EUR/USD";
-
-
-  select.innerHTML = "";
-
-
-  const groups = {};
-
-
-  SYMBOLS.forEach(
-    item => {
-
-      if (!groups[item.category]) {
-
-        groups[item.category] =
-          [];
-
-      }
-
-
-      groups[item.category]
-        .push(item);
-
-    }
-  );
-
-
-  Object.entries(
-    groups
-  ).forEach(
-    (
-      [
-        category,
-        list
-      ]
-    ) => {
-
-      const group =
-        document.createElement(
-          "optgroup"
-        );
-
-
-      group.label =
-        category;
-
-
-      list.forEach(
-        item => {
-
-          const option =
-            document.createElement(
-              "option"
-            );
-
-
-          option.value =
-            item.symbol;
-
-
-          option.textContent =
-            `${item.symbol} — ${item.name}`;
-
-
-          group.appendChild(
-            option
-          );
-
-        }
-      );
-
-
-      select.appendChild(
-        group
-      );
-
-    }
-  );
-
-
-  const exists =
-    SYMBOLS.some(
-      item =>
-        item.symbol ===
-        current
-    );
-
-
-  select.value =
-    exists
-      ? current
-      : "EUR/USD";
-
-
-  lastTerminalSymbol =
-    select.value;
-
-}
-
-
-// =====================================================
-// MARKET HEADER
-// =====================================================
-
-function renderMarketHeader(
-  data
+function getCurrentPrice(
+  symbol
 ) {
 
-  if (!data) {
+  return Number(
+    marketPrices[symbol]
+      ?.price
+  );
 
-    return;
-
-  }
-
-
-  const symbol =
-    data.symbol ||
-    lastTerminalSymbol;
+}
 
 
-  const price =
+function getTradePnL(
+  trade
+) {
+
+  const current =
+    getCurrentPrice(
+      trade.symbol
+    );
+
+  const entry =
     Number(
-      data.price
+      trade.entry
     );
 
-
-  const change =
-    safeNumber(
-      data.percentChange
+  const size =
+    Number(
+      trade.size
     );
 
+  if (
+    !Number.isFinite(current) ||
+    !Number.isFinite(entry) ||
+    !Number.isFinite(size)
+  ) {
 
-  if ($("market-symbol")) {
-
-    $("market-symbol")
-      .textContent =
-      symbol;
-
-  }
-
-
-  if ($("market-price")) {
-
-    $("market-price")
-      .textContent =
-      formatPrice(
-        price,
-        symbol
-      );
+    return 0;
 
   }
 
+  const info =
+    getSymbolInfo(
+      trade.symbol
+    );
 
-  if ($("market-change")) {
+  const difference =
+    trade.side === "BUY"
+      ? current - entry
+      : entry - current;
 
-    $("market-change")
-      .textContent =
-      `${change >= 0 ? "+" : ""}${change.toFixed(3)}%`;
-
-
-    $("market-change").style.color =
-      change >= 0
-        ? "var(--green)"
-        : "var(--red)";
-
-  }
-
-
-  if ($("market-status")) {
-
-    $("market-status")
-      .textContent =
-      "● LIVE MARKET";
-
-
-    $("market-status").style.color =
-      "var(--green)";
-
-  }
-
-
-  if ($("home-price")) {
-
-    $("home-price")
-      .textContent =
-      formatPrice(
-        price,
-        symbol
-      );
-
-  }
-
-
-  updateChartOverlay();
+  return (
+    difference *
+    size *
+    info.contract
+  );
 
 }
 
 
 // =====================================================
-// MARKET UPDATE
+// UPDATE MARKET PRICE
 // =====================================================
 
-async function updateMarketPrice() {
-
-  const symbol =
-    getSelectedSymbol();
-
+async function updateOneMarketPrice(
+  symbol
+) {
 
   try {
 
@@ -2229,61 +1769,174 @@ async function updateMarketPrice() {
         symbol
       );
 
+    marketPrices[symbol] = {
 
-    currentMarket =
-      data;
+      ...data,
 
+      price:
+        Number(
+          data.price
+        ),
 
-    renderMarketHeader(
-      data
-    );
+      percentChange:
+        Number(
+          data.percentChange ||
+          0
+        )
 
-
-    updateOpenTradePrices(
-      symbol,
-      Number(data.price)
-    );
-
-
-    checkStopLossTakeProfit();
-
-
-    calculateAccount();
-
-
-    saveTrades();
-
-    saveAccount();
-
-
-    renderOpenTrades();
-
-    renderHistory();
-
-    renderDashboard();
-
+    };
 
     return data;
 
   } catch (error) {
 
     console.error(
-      "Market update error:",
+      `Market error ${symbol}:`,
       error
     );
 
+    return null;
 
-    if ($("market-status")) {
+  }
 
-      $("market-status")
-        .textContent =
-        "● MARKET ERROR";
+}
 
 
-      $("market-status").style.color =
-        "var(--red)";
+async function updateMarketPrice() {
+
+  const selected =
+    $("symbol")
+      ?.value ||
+    "EUR/USD";
+
+  const needed =
+    new Set();
+
+  needed.add(
+    selected
+  );
+
+  openTrades.forEach(
+    trade => {
+
+      needed.add(
+        trade.symbol
+      );
 
     }
+  );
+
+  const symbols =
+    [...needed];
+
+  /*
+   * Sequential requests are intentional.
+   * Twelve Data free plans have request limits.
+   */
+
+  for (
+    const symbol
+    of symbols
+  ) {
+
+    await updateOneMarketPrice(
+      symbol
+    );
+
+  }
+
+  updateMarketUI();
+
+  checkStopLossTakeProfit();
+
+  renderOpenTrades();
+
+  refreshAccountEquity();
+
+  renderDashboard();
+
+  renderChartPnL();
+
+}
+
+
+function updateMarketUI() {
+
+  const symbol =
+    $("symbol")
+      ?.value ||
+    "EUR/USD";
+
+  const data =
+    marketPrices[symbol];
+
+  if (!data) {
+    return;
+  }
+
+  const price =
+    Number(
+      data.price
+    );
+
+  const change =
+    Number(
+      data.percentChange ||
+      0
+    );
+
+  const decimals =
+    getDecimals(
+      symbol
+    );
+
+  if ($("market-price")) {
+
+    $("market-price").textContent =
+      Number.isFinite(price)
+        ? price.toFixed(
+            decimals
+          )
+        : "Unavailable";
+
+  }
+
+  if ($("market-change")) {
+
+    $("market-change").textContent =
+      `${change >= 0 ? "+" : ""}${change.toFixed(3)}%`;
+
+    $("market-change").style.color =
+      change >= 0
+        ? "var(--green)"
+        : "var(--red)";
+
+  }
+
+  if ($("market-symbol")) {
+
+    $("market-symbol").textContent =
+      data.symbol ||
+      symbol;
+
+  }
+
+  if ($("market-status")) {
+
+    $("market-status").textContent =
+      "● LIVE MARKET";
+
+    $("market-status").style.color =
+      "var(--green)";
+
+  }
+
+  if ($("home-price")) {
+
+    $("home-price").textContent =
+      price.toFixed(
+        decimals
+      );
 
   }
 
@@ -2296,30 +1949,26 @@ async function updateMarketPrice() {
 
 async function updateHomePrice() {
 
-  try {
+  const symbol =
+    "EUR/USD";
 
-    const data =
-      await getMarketPrice(
-        "EUR/USD"
-      );
-
-
-    if ($("home-price")) {
-
-      $("home-price")
-        .textContent =
-        formatPrice(
-          data.price,
-          "EUR/USD"
-        );
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      error
+  const data =
+    await updateOneMarketPrice(
+      symbol
     );
+
+  if (!data) {
+    return;
+  }
+
+  if ($("home-price")) {
+
+    $("home-price").textContent =
+      Number(
+        data.price
+      ).toFixed(
+        getDecimals(symbol)
+      );
 
   }
 
@@ -2327,532 +1976,242 @@ async function updateHomePrice() {
 
 
 // =====================================================
-// POSITION P&L ENGINE
+// SYMBOL SELECT
 // =====================================================
 
-function calculateTradePnl(
-  trade,
-  currentPrice
-) {
+function populateSymbols() {
 
-  const entry =
-    Number(
-      trade.entry
+  const select =
+    $("symbol");
+
+  if (!select) {
+    return;
+  }
+
+  const current =
+    select.value ||
+    "EUR/USD";
+
+  select.innerHTML =
+    SYMBOLS
+      .map(
+        item => `
+
+          <option
+            value="${escapeHTML(
+              item.value
+            )}"
+          >
+            ${escapeHTML(
+              item.label
+            )}
+          </option>
+
+        `
+      )
+      .join("");
+
+  select.value =
+    SYMBOLS.some(
+      item =>
+        item.value === current
+    )
+      ? current
+      : "EUR/USD";
+
+}
+
+
+$("symbol")?.addEventListener(
+  "change",
+  async () => {
+
+    loadTradingViewChart();
+
+    await updateMarketPrice();
+
+  }
+);
+
+
+// =====================================================
+// TERMINAL
+// =====================================================
+
+function loadTerminal() {
+
+  populateSymbols();
+
+  loadTradingViewChart();
+
+  enableChartFullscreen();
+
+  updateMarketPrice();
+
+  renderOpenTrades();
+
+  renderHistory();
+
+  renderChartPnL();
+
+  if (marketTimer) {
+
+    clearInterval(
+      marketTimer
     );
 
+  }
 
-  const price =
-    Number(
-      currentPrice
+  marketTimer =
+    setInterval(
+      updateMarketPrice,
+      MARKET_REFRESH_MS
     );
 
+}
+
+
+// =====================================================
+// ORDER INPUTS
+// =====================================================
+
+function getOrderValues() {
+
+  const symbol =
+    $("symbol")
+      ?.value ||
+    "EUR/USD";
 
   const size =
     Number(
-      trade.size
+      $("size")
+        ?.value
     );
 
+  const slRaw =
+    $("stop-loss")
+      ?.value
+      ?.trim();
 
-  if (
-    !Number.isFinite(entry) ||
-    !Number.isFinite(price) ||
-    !Number.isFinite(size)
-  ) {
+  const tpRaw =
+    $("take-profit")
+      ?.value
+      ?.trim();
 
-    return 0;
+  const sideSelect =
+    $("side")
+      ?.value;
 
-  }
+  return {
 
+    symbol,
 
-  const side =
-    trade.side;
+    size,
 
+    sl:
+      slRaw
+        ? Number(slRaw)
+        : null,
 
-  const symbol =
-    trade.symbol;
+    tp:
+      tpRaw
+        ? Number(tpRaw)
+        : null,
 
+    side:
+      sideSelect === "SELL"
+        ? "SELL"
+        : "BUY"
 
-  let difference =
-    side === "BUY"
-      ? price - entry
-      : entry - price;
-
-
-  // ---------------------------------------------
-  // Gold / Silver
-  // ---------------------------------------------
-
-  if (
-    symbol === "XAU/USD"
-  ) {
-
-    // Standard demo assumption:
-    // 1 lot = 100 oz
-
-    return (
-      difference *
-      size *
-      100
-    );
-
-  }
-
-
-  if (
-    symbol === "XAG/USD"
-  ) {
-
-    // Standard demo assumption:
-    // 1 lot = 5000 oz
-
-    return (
-      difference *
-      size *
-      5000
-    );
-
-  }
-
-
-  // ---------------------------------------------
-  // Crypto
-  // ---------------------------------------------
-
-  if (
-    symbol.includes("BTC/") ||
-    symbol.includes("ETH/") ||
-    symbol.includes("SOL/") ||
-    symbol.includes("XRP/")
-  ) {
-
-    return (
-      difference *
-      size
-    );
-
-  }
-
-
-  // ---------------------------------------------
-  // USD/JPY
-  // ---------------------------------------------
-
-  if (
-    symbol === "USD/JPY"
-  ) {
-
-    return (
-      difference *
-      size *
-      100000 /
-      price
-    );
-
-  }
-
-
-  // ---------------------------------------------
-  // Other USD quoted FX
-  // ---------------------------------------------
-
-  if (
-    symbol.endsWith("/USD")
-  ) {
-
-    return (
-      difference *
-      size *
-      100000
-    );
-
-  }
-
-
-  // ---------------------------------------------
-  // Fallback
-  // ---------------------------------------------
-
-  return (
-    difference *
-    size *
-    100000
-  );
+  };
 
 }
 
 
 // =====================================================
-// UPDATE OPEN TRADE PRICES
+// SL / TP VALIDATION
 // =====================================================
 
-function updateOpenTradePrices(
-  symbol,
-  price
+function validateStops(
+  side,
+  entry,
+  sl,
+  tp
 ) {
 
-  trades.forEach(
-    trade => {
+  if (
+    sl !== null &&
+    !Number.isFinite(sl)
+  ) {
 
-      if (
-        trade.status !==
-        "OPEN"
-      ) {
+    return "Invalid Stop Loss.";
 
-        return;
+  }
 
-      }
+  if (
+    tp !== null &&
+    !Number.isFinite(tp)
+  ) {
 
+    return "Invalid Take Profit.";
 
-      if (
-        trade.symbol !==
-        symbol
-      ) {
+  }
 
-        return;
+  if (
+    side === "BUY"
+  ) {
 
-      }
+    if (
+      sl !== null &&
+      sl >= entry
+    ) {
 
-
-      trade.currentPrice =
-        price;
-
-
-      trade.livePnl =
-        calculateTradePnl(
-          trade,
-          price
-        );
+      return "For BUY, Stop Loss must be below entry price.";
 
     }
-  );
 
-}
+    if (
+      tp !== null &&
+      tp <= entry
+    ) {
 
-
-// =====================================================
-// CHECK SL / TP
-// =====================================================
-
-function checkStopLossTakeProfit() {
-
-  let changed =
-    false;
-
-
-  trades.forEach(
-    trade => {
-
-      if (
-        trade.status !==
-        "OPEN"
-      ) {
-
-        return;
-
-      }
-
-
-      const price =
-        Number(
-          trade.currentPrice
-        );
-
-
-      if (
-        !Number.isFinite(price)
-      ) {
-
-        return;
-
-      }
-
-
-      const sl =
-        trade.stopLoss;
-
-
-      const tp =
-        trade.takeProfit;
-
-
-      let reason =
-        null;
-
-
-      // -------------------------------------------
-      // BUY
-      // -------------------------------------------
-
-      if (
-        trade.side ===
-        "BUY"
-      ) {
-
-        if (
-          sl !== null &&
-          sl !== undefined &&
-          Number.isFinite(
-            Number(sl)
-          ) &&
-          price <=
-            Number(sl)
-        ) {
-
-          reason =
-            "Stop Loss";
-
-        }
-
-
-        if (
-          !reason &&
-          tp !== null &&
-          tp !== undefined &&
-          Number.isFinite(
-            Number(tp)
-          ) &&
-          price >=
-            Number(tp)
-        ) {
-
-          reason =
-            "Take Profit";
-
-        }
-
-      }
-
-
-      // -------------------------------------------
-      // SELL
-      // -------------------------------------------
-
-      if (
-        trade.side ===
-        "SELL"
-      ) {
-
-        if (
-          sl !== null &&
-          sl !== undefined &&
-          Number.isFinite(
-            Number(sl)
-          ) &&
-          price >=
-            Number(sl)
-        ) {
-
-          reason =
-            "Stop Loss";
-
-        }
-
-
-        if (
-          !reason &&
-          tp !== null &&
-          tp !== undefined &&
-          Number.isFinite(
-            Number(tp)
-          ) &&
-          price <=
-            Number(tp)
-        ) {
-
-          reason =
-            "Take Profit";
-
-        }
-
-      }
-
-
-      if (reason) {
-
-        closeTradeInternal(
-          trade.id,
-          price,
-          reason
-        );
-
-
-        changed =
-          true;
-
-      }
+      return "For BUY, Take Profit must be above entry price.";
 
     }
-  );
 
+  } else {
 
-  if (changed) {
+    if (
+      sl !== null &&
+      sl <= entry
+    ) {
 
-    saveTrades();
+      return "For SELL, Stop Loss must be above entry price.";
 
-    calculateAccount();
+    }
 
-    saveAccount();
+    if (
+      tp !== null &&
+      tp >= entry
+    ) {
 
-    renderOpenTrades();
+      return "For SELL, Take Profit must be below entry price.";
 
-    renderHistory();
-
-    renderDashboard();
+    }
 
   }
+
+  return null;
 
 }
 
 
 // =====================================================
-// ACCOUNT CALCULATION
-// =====================================================
-
-function calculateAccount() {
-
-  if (!currentAccount) {
-
-    return;
-
-  }
-
-
-  const closedPnl =
-    trades
-      .filter(
-        trade =>
-          trade.status ===
-          "CLOSED"
-      )
-      .reduce(
-        (
-          total,
-          trade
-        ) =>
-          total +
-          safeNumber(
-            trade.realizedPnl
-          ),
-        0
-      );
-
-
-  const openPnl =
-    trades
-      .filter(
-        trade =>
-          trade.status ===
-          "OPEN"
-      )
-      .reduce(
-        (
-          total,
-          trade
-        ) =>
-          total +
-          safeNumber(
-            trade.livePnl
-          ),
-        0
-      );
-
-
-  currentAccount.pnl =
-    closedPnl +
-    openPnl;
-
-
-  currentAccount.equity =
-    currentAccount.balance +
-    currentAccount.pnl;
-
-
-  currentAccount.drawdown =
-    Math.max(
-      0,
-      currentAccount.balance -
-      currentAccount.equity
-    );
-
-
-  // -------------------------------------------
-  // Risk rules
-  // -------------------------------------------
-
-  const maxDrawdownAmount =
-    currentAccount.balance *
-    (
-      safeNumber(
-        currentAccount.rules?.maxDrawdown,
-        10
-      ) /
-      100
-    );
-
-
-  const dailyLossAmount =
-    currentAccount.balance *
-    (
-      safeNumber(
-        currentAccount.rules?.dailyLoss,
-        5
-      ) /
-      100
-    );
-
-
-  if (
-    currentAccount.drawdown >=
-    maxDrawdownAmount
-  ) {
-
-    currentAccount.status =
-      "FAILED";
-
-  }
-
-
-  if (
-    currentAccount.pnl <=
-    -dailyLossAmount
-  ) {
-
-    currentAccount.status =
-      "FAILED";
-
-  }
-
-
-  const targetAmount =
-    currentAccount.balance *
-    (
-      safeNumber(
-        currentAccount.rules?.target,
-        8
-      ) /
-      100
-    );
-
-
-  if (
-    currentAccount.pnl >=
-    targetAmount
-  ) {
-
-    currentAccount.status =
-      "PASSED";
-
-  }
-
-}
-
-
-// =====================================================
-// EXECUTE TRADE
+// OPEN VIRTUAL TRADE
 // =====================================================
 
 async function executeTrade(
-  side
+  forcedSide = null
 ) {
 
   if (!currentAccount) {
@@ -2862,69 +2221,22 @@ async function executeTrade(
       "Activate an account first."
     );
 
-
     return;
 
   }
 
+  const order =
+    getOrderValues();
+
+  const side =
+    forcedSide ||
+    order.side;
 
   if (
-    currentAccount.status !==
-    "ACTIVE"
-  ) {
-
-    setMessage(
-      "trade-msg",
-      `Account is ${currentAccount.status}. Trading is disabled.`
-    );
-
-
-    return;
-
-  }
-
-
-  const size =
-    safeNumber(
-      $("size")
-        ?.value,
-      0
-    );
-
-
-  const symbol =
-    getSelectedSymbol();
-
-
-  const slRaw =
-    $("stop-loss")
-      ?.value
-      ?.trim()
-    || "";
-
-
-  const tpRaw =
-    $("take-profit")
-      ?.value
-      ?.trim()
-    || "";
-
-
-  const stopLoss =
-    slRaw === ""
-      ? null
-      : Number(slRaw);
-
-
-  const takeProfit =
-    tpRaw === ""
-      ? null
-      : Number(tpRaw);
-
-
-  if (
-    !size ||
-    size <= 0
+    !Number.isFinite(
+      order.size
+    ) ||
+    order.size <= 0
   ) {
 
     setMessage(
@@ -2932,274 +2244,359 @@ async function executeTrade(
       "Enter a valid position size."
     );
 
-
     return;
 
   }
-
-
-  // -------------------------------------------
-  // SL / TP number validation
-  // -------------------------------------------
-
-  if (
-    stopLoss !== null &&
-    !Number.isFinite(
-      stopLoss
-    )
-  ) {
-
-    setMessage(
-      "trade-msg",
-      "Enter a valid Stop Loss price."
-    );
-
-
-    return;
-
-  }
-
-
-  if (
-    takeProfit !== null &&
-    !Number.isFinite(
-      takeProfit
-    )
-  ) {
-
-    setMessage(
-      "trade-msg",
-      "Enter a valid Take Profit price."
-    );
-
-
-    return;
-
-  }
-
 
   setMessage(
     "trade-msg",
     "Getting live market price..."
   );
 
-
-  let market;
-
-
-  try {
-
-    market =
-      await getMarketPrice(
-        symbol
-      );
-
-  } catch (error) {
-
-    console.error(
-      error
+  const market =
+    await updateOneMarketPrice(
+      order.symbol
     );
 
+  if (!market) {
 
     setMessage(
       "trade-msg",
       "Market data unavailable. Try again."
     );
 
-
     return;
 
   }
-
 
   const entry =
     Number(
       market.price
     );
 
+  const stopError =
+    validateStops(
+      side,
+      entry,
+      order.sl,
+      order.tp
+    );
 
-  if (
-    !Number.isFinite(entry)
-  ) {
+  if (stopError) {
 
     setMessage(
       "trade-msg",
-      "Invalid market price."
+      stopError
     );
-
 
     return;
 
   }
 
-
-  // -------------------------------------------
-  // BUY validation
-  // -------------------------------------------
-
-  if (
-    side ===
-    "BUY"
-  ) {
-
-    if (
-      stopLoss !== null &&
-      stopLoss >= entry
-    ) {
-
-      setMessage(
-        "trade-msg",
-        `BUY Stop Loss must be below entry ${formatPrice(
-          entry,
-          symbol
-        )}.`
-      );
-
-
-      return;
-
-    }
-
-
-    if (
-      takeProfit !== null &&
-      takeProfit <= entry
-    ) {
-
-      setMessage(
-        "trade-msg",
-        `BUY Take Profit must be above entry ${formatPrice(
-          entry,
-          symbol
-        )}.`
-      );
-
-
-      return;
-
-    }
-
-  }
-
-
-  // -------------------------------------------
-  // SELL validation
-  // -------------------------------------------
-
-  if (
-    side ===
-    "SELL"
-  ) {
-
-    if (
-      stopLoss !== null &&
-      stopLoss <= entry
-    ) {
-
-      setMessage(
-        "trade-msg",
-        `SELL Stop Loss must be above entry ${formatPrice(
-          entry,
-          symbol
-        )}.`
-      );
-
-
-      return;
-
-    }
-
-
-    if (
-      takeProfit !== null &&
-      takeProfit >= entry
-    ) {
-
-      setMessage(
-        "trade-msg",
-        `SELL Take Profit must be below entry ${formatPrice(
-          entry,
-          symbol
-        )}.`
-      );
-
-
-      return;
-
-    }
-
-  }
-
-
-  // -------------------------------------------
-  // CREATE TRADE
-  // -------------------------------------------
-
   const trade = {
 
     id:
-      crypto.randomUUID
-        ? crypto.randomUUID()
-        : String(
-            Date.now()
-          ),
+      createId(),
 
-    side:
-      side,
+    side,
 
     symbol:
-      symbol,
+      order.symbol,
 
     size:
-      size,
+      order.size,
 
-    entry:
+    entry,
+
+    sl:
+      order.sl,
+
+    tp:
+      order.tp,
+
+    current:
       entry,
 
-    currentPrice:
-      entry,
-
-    stopLoss:
-      stopLoss,
-
-    takeProfit:
-      takeProfit,
-
-    livePnl:
+    unrealizedPnl:
       0,
-
-    realizedPnl:
-      0,
-
-    status:
-      "OPEN",
 
     openedAt:
       new Date()
         .toISOString(),
 
-    closedAt:
-      null,
-
-    closeReason:
-      null
+    status:
+      "OPEN"
 
   };
 
-
-  trades.unshift(
+  openTrades.unshift(
     trade
   );
 
+  saveOpenTrades();
+
+  renderOpenTrades();
+
+  renderChartPnL();
+
+  refreshAccountEquity();
+
+  renderDashboard();
+
+  setMessage(
+    "trade-msg",
+
+    `${side} ${order.symbol} opened at ${entry.toFixed(
+      getDecimals(
+        order.symbol
+      )
+    )}.`,
+
+    true
+  );
+
+}
+
+
+// =====================================================
+// BUY / SELL
+// =====================================================
+
+$("buy")?.addEventListener(
+  "click",
+  () => {
+
+    executeTrade(
+      "BUY"
+    );
+
+  }
+);
+
+
+$("sell")?.addEventListener(
+  "click",
+  () => {
+
+    executeTrade(
+      "SELL"
+    );
+
+  }
+);
+
+
+// =====================================================
+// STOP LOSS / TAKE PROFIT
+// =====================================================
+
+function checkStopLossTakeProfit() {
+
+  if (!openTrades.length) {
+    return;
+  }
+
+  const toClose = [];
+
+  openTrades.forEach(
+    trade => {
+
+      const price =
+        getCurrentPrice(
+          trade.symbol
+        );
+
+      if (
+        !Number.isFinite(price)
+      ) {
+        return;
+      }
+
+      trade.current =
+        price;
+
+      trade.unrealizedPnl =
+        getTradePnL(
+          trade
+        );
+
+      let reason =
+        null;
+
+      if (
+        trade.side === "BUY"
+      ) {
+
+        if (
+          trade.sl !== null &&
+          price <= trade.sl
+        ) {
+
+          reason =
+            "STOP LOSS";
+
+        } else if (
+          trade.tp !== null &&
+          price >= trade.tp
+        ) {
+
+          reason =
+            "TAKE PROFIT";
+
+        }
+
+      } else {
+
+        if (
+          trade.sl !== null &&
+          price >= trade.sl
+        ) {
+
+          reason =
+            "STOP LOSS";
+
+        } else if (
+          trade.tp !== null &&
+          price <= trade.tp
+        ) {
+
+          reason =
+            "TAKE PROFIT";
+
+        }
+
+      }
+
+      if (reason) {
+
+        toClose.push({
+          id:
+            trade.id,
+          reason
+        });
+
+      }
+
+    }
+  );
+
+  toClose.forEach(
+    item => {
+
+      closeTrade(
+        item.id,
+        item.reason
+      );
+
+    }
+  );
+
+}
+
+
+// =====================================================
+// CLOSE TRADE
+// =====================================================
+
+function closeTrade(
+  tradeId,
+  reason = "MANUAL CLOSE"
+) {
+
+  const index =
+    openTrades.findIndex(
+      trade =>
+        trade.id ===
+        tradeId
+    );
+
+  if (index === -1) {
+    return;
+  }
+
+  const trade =
+    openTrades[index];
+
+  const current =
+    getCurrentPrice(
+      trade.symbol
+    );
+
+  const exit =
+    Number.isFinite(current)
+      ? current
+      : Number(
+          trade.current ||
+          trade.entry
+        );
+
+  trade.current =
+    exit;
+
+  const pnl =
+    getTradePnL(
+      trade
+    );
+
+  const closedTrade = {
+
+    id:
+      trade.id,
+
+    side:
+      trade.side,
+
+    symbol:
+      trade.symbol,
+
+    size:
+      trade.size,
+
+    entry:
+      trade.entry,
+
+    exit,
+
+    sl:
+      trade.sl,
+
+    tp:
+      trade.tp,
+
+    pnl,
+
+    closeReason:
+      reason,
+
+    openedAt:
+      trade.openedAt,
+
+    closedAt:
+      new Date()
+        .toISOString(),
+
+    status:
+      "CLOSED"
+
+  };
+
+  trades.unshift(
+    closedTrade
+  );
+
+  currentAccount.pnl +=
+    pnl;
+
+  openTrades.splice(
+    index,
+    1
+  );
 
   saveTrades();
 
+  saveOpenTrades();
 
-  calculateAccount();
-
-
-  saveAccount();
-
+  refreshAccountEquity();
 
   renderOpenTrades();
 
@@ -3207,257 +2604,24 @@ async function executeTrade(
 
   renderDashboard();
 
-  updateChartOverlay();
-
-
-  setMessage(
-    "trade-msg",
-    `${side} ${symbol} opened virtually at ${formatPrice(
-      entry,
-      symbol
-    )}.`,
-    true
-  );
-
-
-  // Immediately update price/P&L.
-  currentMarket =
-    market;
-
-
-  updateOpenTradePrices(
-    symbol,
-    entry
-  );
-
-
-  updateChartOverlay();
-
-}
-
-
-// =====================================================
-// BUY
-// =====================================================
-
-$("buy")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      executeTrade(
-        "BUY"
-      );
-
-    }
-  );
-
-
-// =====================================================
-// SELL
-// =====================================================
-
-$("sell")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      executeTrade(
-        "SELL"
-      );
-
-    }
-  );
-
-
-// =====================================================
-// CLOSE TRADE INTERNAL
-// =====================================================
-
-function closeTradeInternal(
-  tradeId,
-  price,
-  reason = "Manual"
-) {
-
-  const trade =
-    trades.find(
-      item =>
-        item.id ===
-        tradeId
-    );
-
-
-  if (!trade) {
-
-    return false;
-
-  }
-
-
-  if (
-    trade.status !==
-    "OPEN"
-  ) {
-
-    return false;
-
-  }
-
-
-  const exitPrice =
-    Number(price);
-
-
-  trade.currentPrice =
-    exitPrice;
-
-
-  trade.livePnl =
-    calculateTradePnl(
-      trade,
-      exitPrice
-    );
-
-
-  trade.realizedPnl =
-    trade.livePnl;
-
-
-  trade.status =
-    "CLOSED";
-
-
-  trade.closedAt =
-    new Date()
-      .toISOString();
-
-
-  trade.closeReason =
-    reason;
-
-
-  return true;
-
-}
-
-
-// =====================================================
-// MANUAL CLOSE
-// =====================================================
-
-async function manualCloseTrade(
-  tradeId
-) {
-
-  const trade =
-    trades.find(
-      item =>
-        item.id ===
-        tradeId
-    );
-
-
-  if (!trade) {
-
-    return;
-
-  }
-
-
-  if (
-    trade.status !==
-    "OPEN"
-  ) {
-
-    return;
-
-  }
-
+  renderChartPnL();
 
   setMessage(
     "trade-msg",
-    "Getting current exit price..."
+    `${trade.side} ${trade.symbol} closed at ${number(
+      exit,
+      getDecimals(
+        trade.symbol
+      )
+    )} | ${reason} | ${pnl >= 0 ? "+" : ""}${money(pnl)}`,
+    pnl >= 0
   );
-
-
-  try {
-
-    const market =
-      await getMarketPrice(
-        trade.symbol
-      );
-
-
-    const price =
-      Number(
-        market.price
-      );
-
-
-    const closed =
-      closeTradeInternal(
-        trade.id,
-        price,
-        "Manual Close"
-      );
-
-
-    if (!closed) {
-
-      return;
-
-    }
-
-
-    saveTrades();
-
-
-    calculateAccount();
-
-
-    saveAccount();
-
-
-    renderOpenTrades();
-
-    renderHistory();
-
-    renderDashboard();
-
-    updateChartOverlay();
-
-
-    setMessage(
-      "trade-msg",
-      `${trade.symbol} ${trade.side} closed at ${formatPrice(
-        price,
-        trade.symbol
-      )}. P&L ${money(
-        trade.realizedPnl
-      )}.`,
-      true
-    );
-
-  } catch (error) {
-
-    console.error(
-      error
-    );
-
-
-    setMessage(
-      "trade-msg",
-      "Unable to get current market price."
-    );
-
-  }
 
 }
 
 
 // =====================================================
-// CLOSE BUTTON
+// CLOSE BUTTON EVENT
 // =====================================================
 
 document.addEventListener(
@@ -3469,20 +2633,16 @@ document.addEventListener(
         "[data-close-trade]"
       );
 
-
     if (!button) {
-
       return;
-
     }
-
 
     const tradeId =
       button.dataset.closeTrade;
 
-
-    manualCloseTrade(
-      tradeId
+    closeTrade(
+      tradeId,
+      "MANUAL CLOSE"
     );
 
   }
@@ -3490,364 +2650,252 @@ document.addEventListener(
 
 
 // =====================================================
-// OPEN TRADES CONTAINER
-// =====================================================
-
-function ensureOpenTradesContainer() {
-
-  let container =
-    $("open-trades");
-
-
-  if (container) {
-
-    return container;
-
-  }
-
-
-  const terminal =
-    $("terminal");
-
-
-  if (!terminal) {
-
-    return null;
-
-  }
-
-
-  const history =
-    $("history")
-      ?.closest(
-        ".panel"
-      );
-
-
-  container =
-    document.createElement(
-      "div"
-    );
-
-
-  container.id =
-    "open-trades";
-
-
-  container.className =
-    "panel";
-
-
-  container.innerHTML = `
-
-    <div class="section-head compact">
-
-      <div>
-
-        <p class="eyebrow">
-          POSITIONS
-        </p>
-
-        <h3>
-          Open Trades
-        </h3>
-
-      </div>
-
-    </div>
-
-    <div id="open-trades-list"></div>
-
-  `;
-
-
-  if (history) {
-
-    terminal.insertBefore(
-      container,
-      history
-    );
-
-  } else {
-
-    terminal.appendChild(
-      container
-    );
-
-  }
-
-
-  return container;
-
-}
-
-
-// =====================================================
-// RENDER OPEN TRADES
+// OPEN POSITIONS
 // =====================================================
 
 function renderOpenTrades() {
 
   const container =
-    ensureOpenTradesContainer();
-
+    $("open-trades");
 
   if (!container) {
 
-    return;
-
-  }
-
-
-  let list =
-    $("open-trades-list");
-
-
-  if (!list) {
+    /*
+     * If your HTML uses another ID,
+     * create:
+     *
+     * <div id="open-trades"></div>
+     *
+     */
 
     return;
 
   }
 
+  if (!openTrades.length) {
 
-  const open =
-    trades.filter(
-      trade =>
-        trade.status ===
-        "OPEN"
-    );
-
-
-  if (!open.length) {
-
-    list.innerHTML = `
+    container.innerHTML = `
 
       <div class="history-empty">
-        No open trades.
+
+        <span>
+          0 OPEN
+        </span>
+
+        <p>
+          No open trades.
+        </p>
+
       </div>
 
     `;
 
-
     return;
 
   }
 
-
-  list.innerHTML =
-    open
+  container.innerHTML =
+    openTrades
       .map(
         trade => {
 
-          const pnl =
-            safeNumber(
-              trade.livePnl
+          const price =
+            getCurrentPrice(
+              trade.symbol
             );
 
+          const current =
+            Number.isFinite(price)
+              ? price
+              : trade.current;
 
-          const pnlColor =
+          const pnl =
+            getTradePnL(
+              trade
+            );
+
+          const decimals =
+            getDecimals(
+              trade.symbol
+            );
+
+          const pnlClass =
             pnl >= 0
               ? "var(--green)"
               : "var(--red)";
-
 
           return `
 
             <div
               class="open-trade-card"
-              style="
-                border:1px solid var(--border);
-                border-radius:14px;
-                padding:18px;
-                margin-top:12px;
-                background:#0d1118;
-              "
+              data-trade-id="${escapeHTML(
+                trade.id
+              )}"
             >
 
-              <div
-                style="
-                  display:flex;
-                  justify-content:space-between;
-                  align-items:center;
-                  gap:10px;
-                "
-              >
+              <div class="open-trade-top">
+
+                <div>
+
+                  <h3>
+                    ${escapeHTML(
+                      trade.symbol
+                    )}
+                  </h3>
+
+                  <span
+                    class="${
+                      trade.side === "BUY"
+                        ? "trade-buy"
+                        : "trade-sell"
+                    }"
+                  >
+                    ${trade.side}
+                  </span>
+
+                </div>
 
                 <strong
-                  style="font-size:22px"
+                  style="color:${pnlClass}"
                 >
-                  ${trade.symbol}
+                  ${
+                    pnl >= 0
+                      ? "+"
+                      : ""
+                  }${money(pnl)}
                 </strong>
 
-
-                <span
-                  style="
-                    padding:7px 10px;
-                    border-radius:999px;
-                    font-size:11px;
-                    font-weight:800;
-                    color:${
-                      trade.side === "BUY"
-                        ? "var(--green)"
-                        : "var(--red)"
-                    };
-                    background:${
-                      trade.side === "BUY"
-                        ? "rgba(99,210,154,.12)"
-                        : "rgba(255,107,122,.12)"
-                    };
-                  "
-                >
-                  ${trade.side}
-                </span>
-
               </div>
 
 
-              <div
-                style="
-                  display:grid;
-                  grid-template-columns:1fr 1fr;
-                  gap:14px;
-                  margin-top:18px;
-                "
-              >
+              <div class="open-trade-grid">
 
                 <div>
 
-                  <small class="muted">
+                  <span>
                     Size
-                  </small>
+                  </span>
 
-                  <strong
-                    style="display:block;margin-top:4px"
-                  >
+                  <b>
                     ${trade.size}
-                  </strong>
+                  </b>
 
                 </div>
 
 
                 <div>
 
-                  <small class="muted">
+                  <span>
                     Entry
-                  </small>
+                  </span>
 
-                  <strong
-                    style="display:block;margin-top:4px"
-                  >
-                    ${formatPrice(
+                  <b>
+                    ${number(
                       trade.entry,
-                      trade.symbol
+                      decimals
                     )}
-                  </strong>
+                  </b>
 
                 </div>
 
 
                 <div>
 
-                  <small class="muted">
+                  <span>
                     Current
-                  </small>
+                  </span>
 
-                  <strong
-                    style="display:block;margin-top:4px"
-                  >
-                    ${formatPrice(
-                      trade.currentPrice,
-                      trade.symbol
+                  <b>
+                    ${number(
+                      current,
+                      decimals
                     )}
-                  </strong>
+                  </b>
 
                 </div>
 
 
                 <div>
 
-                  <small class="muted">
+                  <span>
                     Stop Loss
-                  </small>
+                  </span>
 
-                  <strong
-                    style="display:block;margin-top:4px"
-                  >
+                  <b>
                     ${
-                      trade.stopLoss === null ||
-                      trade.stopLoss === undefined
-                        ? "-"
-                        : formatPrice(
-                            trade.stopLoss,
-                            trade.symbol
+                      trade.sl !== null &&
+                      trade.sl !== undefined
+                        ? number(
+                            trade.sl,
+                            decimals
                           )
+                        : "-"
                     }
-                  </strong>
+                  </b>
 
                 </div>
 
 
                 <div>
 
-                  <small class="muted">
+                  <span>
                     Take Profit
-                  </small>
+                  </span>
 
-                  <strong
-                    style="display:block;margin-top:4px"
-                  >
+                  <b>
                     ${
-                      trade.takeProfit === null ||
-                      trade.takeProfit === undefined
-                        ? "-"
-                        : formatPrice(
-                            trade.takeProfit,
-                            trade.symbol
+                      trade.tp !== null &&
+                      trade.tp !== undefined
+                        ? number(
+                            trade.tp,
+                            decimals
                           )
+                        : "-"
                     }
-                  </strong>
+                  </b>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Status
+                  </span>
+
+                  <b class="green">
+                    OPEN
+                  </b>
 
                 </div>
 
               </div>
 
 
-              <div
-                style="
-                  margin-top:18px;
-                  font-size:16px;
-                "
-              >
+              <div class="live-pnl">
 
-                <span class="muted">
+                <span>
                   Live P&L
                 </span>
 
-
                 <strong
-                  style="
-                    display:block;
-                    margin-top:5px;
-                    font-size:26px;
-                    color:${pnlColor};
-                  "
+                  style="color:${pnlClass}"
                 >
-                  ${pnl >= 0 ? "+" : ""}${money(pnl)}
+                  ${
+                    pnl >= 0
+                      ? "+"
+                      : ""
+                  }${money(pnl)}
                 </strong>
 
               </div>
 
 
               <button
-                class="secondary"
-                data-close-trade="${trade.id}"
-                style="
-                  width:100%;
-                  margin-top:16px;
-                  color:var(--red);
-                  border:1px solid rgba(255,107,122,.35);
-                  background:rgba(255,107,122,.08);
-                "
+                class="close-trade"
+                data-close-trade="${escapeHTML(
+                  trade.id
+                )}"
               >
                 Close Trade
               </button>
@@ -3872,37 +2920,23 @@ function renderHistory() {
   const history =
     $("history");
 
-
   if (!history) {
-
     return;
-
   }
 
-
-  const closed =
-    trades.filter(
-      trade =>
-        trade.status ===
-        "CLOSED"
-    );
-
-
-  if (!closed.length) {
+  if (!trades.length) {
 
     history.innerHTML = `
 
       <div class="history-empty">
-        No closed trades yet.
+        No trades yet.
       </div>
 
     `;
 
-
     return;
 
   }
-
 
   history.innerHTML = `
 
@@ -3927,32 +2961,38 @@ function renderHistory() {
     </div>
 
 
-    ${closed
+    ${trades
       .map(
         trade => {
 
           const pnl =
-            safeNumber(
-              trade.realizedPnl
+            Number(
+              trade.pnl ||
+              0
             );
-
 
           return `
 
             <div class="trade-row">
 
               <span>
-                ${trade.side}
+                ${escapeHTML(
+                  trade.side
+                )}
               </span>
 
               <span>
-                ${trade.symbol}
-              </span>
-
-              <span>
-                ${formatPrice(
-                  trade.entry,
+                ${escapeHTML(
                   trade.symbol
+                )}
+              </span>
+
+              <span>
+                ${number(
+                  trade.entry,
+                  getDecimals(
+                    trade.symbol
+                  )
                 )}
               </span>
 
@@ -3966,11 +3006,13 @@ function renderHistory() {
                   }
                 "
               >
+
                 ${
                   pnl >= 0
                     ? "+"
                     : ""
                 }${money(pnl)}
+
               </span>
 
             </div>
@@ -3987,249 +3029,215 @@ function renderHistory() {
 
 
 // =====================================================
-// TERMINAL LOAD
+// CHART P&L OVERLAY
 // =====================================================
 
-function loadTerminal() {
+function renderChartPnL() {
 
-  populateSymbols();
+  const chart =
+    $("tradingview-widget");
 
+  if (!chart) {
+    return;
+  }
 
-  const select =
-    $("symbol");
+  let overlay =
+    $("chart-pnl-overlay");
 
+  if (!overlay) {
 
-  if (select) {
+    overlay =
+      document.createElement(
+        "div"
+      );
 
-    if (
-      lastTerminalSymbol
-    ) {
+    overlay.id =
+      "chart-pnl-overlay";
 
-      const exists =
-        Array.from(
-          select.options
-        ).some(
-          option =>
-            option.value ===
-            lastTerminalSymbol
-        );
+    overlay.style.position =
+      "absolute";
 
+    overlay.style.top =
+      "18px";
 
-      if (exists) {
+    overlay.style.left =
+      "18px";
 
-        select.value =
-          lastTerminalSymbol;
+    overlay.style.zIndex =
+      "20";
 
-      }
+    overlay.style.padding =
+      "10px 14px";
+
+    overlay.style.border =
+      "1px solid var(--border)";
+
+    overlay.style.borderRadius =
+      "10px";
+
+    overlay.style.background =
+      "rgba(9,11,16,.88)";
+
+    overlay.style.backdropFilter =
+      "blur(8px)";
+
+    overlay.style.fontSize =
+      "12px";
+
+    overlay.style.pointerEvents =
+      "none";
+
+    const parent =
+      chart.parentElement;
+
+    if (parent) {
+
+      parent.style.position =
+        "relative";
+
+      parent.appendChild(
+        overlay
+      );
 
     }
 
   }
 
+  const symbol =
+    $("symbol")
+      ?.value ||
+    "EUR/USD";
 
-  lastTerminalSymbol =
-    getSelectedSymbol();
-
-
-  loadTradingViewChart(
-    lastTerminalSymbol
-  );
-
-
-  renderOpenTrades();
-
-  renderHistory();
-
-
-  updateMarketPrice();
-
-
-  if (marketTimer) {
-
-    clearInterval(
-      marketTimer
+  const related =
+    openTrades.filter(
+      trade =>
+        trade.symbol ===
+        symbol
     );
 
-  }
+  if (!related.length) {
 
-
-  marketTimer =
-    setInterval(
-      updateMarketPrice,
-      MARKET_REFRESH_MS
-    );
-
-}
-
-
-// =====================================================
-// SYMBOL CHANGE
-// =====================================================
-
-$("symbol")
-  ?.addEventListener(
-    "change",
-    () => {
-
-      lastTerminalSymbol =
-        $("symbol")
-          .value;
-
-
-      localStorage.setItem(
-        "propdemo_last_symbol",
-        lastTerminalSymbol
-      );
-
-
-      loadTradingViewChart(
-        lastTerminalSymbol
-      );
-
-
-      updateMarketPrice();
-
-    }
-  );
-
-
-// =====================================================
-// SIDE SELECT
-// =====================================================
-
-$("side")
-  ?.addEventListener(
-    "change",
-    () => {
-
-      // No action needed.
-      // BUY / SELL buttons remain direct.
-
-    }
-  );
-
-
-// =====================================================
-// ADD SL / TP INPUTS IF MISSING
-// =====================================================
-
-function ensureOrderInputs() {
-
-  const orderPanel =
-    document.querySelector(
-      ".order-panel"
-    );
-
-
-  if (!orderPanel) {
+    overlay.innerHTML = `
+      <b>
+        ${escapeHTML(symbol)}
+      </b>
+      <br>
+      <span style="color:var(--muted)">
+        No open position
+      </span>
+    `;
 
     return;
 
   }
 
+  const pnl =
+    related.reduce(
+      (
+        total,
+        trade
+      ) =>
+        total +
+        getTradePnL(
+          trade
+        ),
+      0
+    );
 
-  // ---------------------------------------------
-  // Stop Loss
-  // ---------------------------------------------
+  const color =
+    pnl >= 0
+      ? "var(--green)"
+      : "var(--red)";
+
+  overlay.innerHTML = `
+
+    <b>
+      ${escapeHTML(symbol)}
+    </b>
+
+    <br>
+
+    <span>
+      Live P&L:
+    </span>
+
+    <strong
+      style="color:${color}"
+    >
+      ${
+        pnl >= 0
+          ? "+"
+          : ""
+      }${money(pnl)}
+    </strong>
+
+  `;
+
+}
+
+
+// =====================================================
+// RISK CHECK
+// =====================================================
+
+function checkAccountRules() {
+
+  if (!currentAccount) {
+    return;
+  }
+
+  const balance =
+    Number(
+      currentAccount.balance
+    );
 
   if (
-    !$("stop-loss")
+    balance <= 0
+  ) {
+    return;
+  }
+
+  const pnlPercent =
+    (
+      currentAccount.pnl /
+      balance
+    ) *
+    100;
+
+  const drawdownPercent =
+    (
+      currentAccount.drawdown /
+      balance
+    ) *
+    100;
+
+  if (
+    drawdownPercent >=
+    Number(
+      currentAccount.rules
+        .maxDrawdown
+    )
   ) {
 
-    const labels =
-      Array.from(
-        orderPanel.querySelectorAll(
-          "label"
-        )
-      );
+    currentAccount.status =
+      "FAILED";
 
-
-    const sizeInput =
-      $("size");
-
-
-    if (sizeInput) {
-
-      const wrapper =
-        document.createElement(
-          "div"
-        );
-
-
-      wrapper.innerHTML = `
-
-        <label>
-          Stop Loss
-        </label>
-
-        <input
-          id="stop-loss"
-          type="number"
-          step="any"
-          inputmode="decimal"
-          placeholder="Optional"
-        >
-
-      `;
-
-
-      sizeInput
-        .parentNode
-        .insertBefore(
-          wrapper,
-          sizeInput.nextSibling
-        );
-
-    }
+    saveAccount();
 
   }
 
-
-  // ---------------------------------------------
-  // Take Profit
-  // ---------------------------------------------
-
   if (
-    !$("take-profit")
+    pnlPercent >=
+    Number(
+      currentAccount.rules
+        .target
+    )
   ) {
 
-    const sl =
-      $("stop-loss");
+    currentAccount.status =
+      "PASSED";
 
-
-    if (sl) {
-
-      const wrapper =
-        document.createElement(
-          "div"
-        );
-
-
-      wrapper.innerHTML = `
-
-        <label>
-          Take Profit
-        </label>
-
-        <input
-          id="take-profit"
-          type="number"
-          step="any"
-          inputmode="decimal"
-          placeholder="Optional"
-        >
-
-      `;
-
-
-      sl
-        .parentNode
-        .insertAdjacentElement(
-          "afterend",
-          wrapper
-        );
-
-    }
+    saveAccount();
 
   }
 
@@ -4246,38 +3254,42 @@ async function startApp() {
 
   loadTrades();
 
+  loadOpenTrades();
+
   renderPlans();
 
-  populateSymbols();
+  /*
+   * Rebuild live values after refresh.
+   */
 
-  ensureOrderInputs();
+  openTrades.forEach(
+    trade => {
 
+      trade.current =
+        Number(
+          trade.current ||
+          trade.entry
+        );
+
+      trade.unrealizedPnl =
+        0;
+
+    }
+  );
 
   if (currentAccount) {
 
-    calculateAccount();
-
-    saveAccount();
-
-
-    const lastPage =
-      getLastPage();
-
-
-    // If terminal was open before refresh,
-    // open terminal again instead of home.
-
     showPage(
-      lastPage
+      "dashboard"
     );
 
+    renderDashboard();
 
   } else {
 
     showPage(
       "home"
     );
-
 
     updateHomePrice();
 
@@ -4287,32 +3299,44 @@ async function startApp() {
 
 
 // =====================================================
-// SESSION CHECK
+// CHECK SESSION
 // =====================================================
 
 async function checkSession() {
 
-  const {
-    data
-  } =
-    await supabase
-      .auth
-      .getSession();
+  try {
 
+    const {
+      data
+    } =
+      await supabase
+        .auth
+        .getSession();
 
-  currentUser =
-    data.session?.user ||
-    null;
+    currentUser =
+      data.session?.user ||
+      null;
 
+    renderPlans();
 
-  renderPlans();
+    if (currentUser) {
 
+      await startApp();
 
-  if (currentUser) {
+    } else {
 
-    await startApp();
+      showPage(
+        "auth"
+      );
 
-  } else {
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Session error:",
+      error
+    );
 
     showPage(
       "auth"
@@ -4330,7 +3354,7 @@ async function checkSession() {
 supabase
   .auth
   .onAuthStateChange(
-    async (
+    (
       event,
       session
     ) => {
@@ -4339,46 +3363,17 @@ supabase
         session?.user ||
         null;
 
-
-      if (
-        event ===
-        "SIGNED_IN"
-      ) {
-
-        await startApp();
-
-      }
-
-
       if (
         event ===
         "SIGNED_OUT"
       ) {
 
-        currentUser =
-          null;
-
-
         currentAccount =
           null;
 
+        trades = [];
 
-        trades =
-          [];
-
-
-        if (marketTimer) {
-
-          clearInterval(
-            marketTimer
-          );
-
-
-          marketTimer =
-            null;
-
-        }
-
+        openTrades = [];
 
         showPage(
           "auth"
@@ -4391,37 +3386,72 @@ supabase
 
 
 // =====================================================
-// RESTORE LAST SYMBOL
-// =====================================================
-
-const storedSymbol =
-  localStorage.getItem(
-    "propdemo_last_symbol"
-  );
-
-
-if (
-  SYMBOLS.some(
-    item =>
-      item.symbol ===
-      storedSymbol
-  )
-) {
-
-  lastTerminalSymbol =
-    storedSymbol;
-
-}
-
-
-// =====================================================
 // INITIALIZE
 // =====================================================
 
 updateAuthUI();
 
+populateSymbols();
+
 renderPlans();
 
-ensureOrderInputs();
-
 checkSession();
+
+
+// =====================================================
+// KEEP OPEN POSITIONS ALIVE
+// =====================================================
+
+setInterval(
+  () => {
+
+    if (
+      currentUser &&
+      currentAccount &&
+      openTrades.length
+    ) {
+
+      checkStopLossTakeProfit();
+
+      renderOpenTrades();
+
+      renderChartPnL();
+
+      refreshAccountEquity();
+
+      checkAccountRules();
+
+    }
+
+  },
+  1000
+);
+
+
+// =====================================================
+// PAGE VISIBILITY
+// =====================================================
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if (
+      document.visibilityState ===
+      "visible"
+    ) {
+
+      if (
+        currentUser &&
+        currentPage ===
+        "terminal"
+      ) {
+
+        updateMarketPrice();
+
+      }
+
+    }
+
+  }
+);
