@@ -15,7 +15,7 @@
     content="#090b10"
   >
 
-  <title>Prop Demo — Chart</title>
+  <title>007 Live Chart</title>
 
   <link
     rel="stylesheet"
@@ -29,13 +29,13 @@
 <div class="app">
 
   <!-- =====================================================
-       SIMPLE HEADER
+       HEADER
   ====================================================== -->
 
   <header>
 
     <div class="brand">
-      PROP<span>DEMO</span>
+      007
     </div>
 
     <div class="chart-header-status">
@@ -55,7 +55,7 @@
 
 
   <!-- =====================================================
-       CHART
+       MAIN CHART
   ====================================================== -->
 
   <main>
@@ -64,6 +64,10 @@
       id="terminal"
       class="chart-page"
     >
+
+      <!-- =================================================
+           CHART TOOLBAR
+      ================================================== -->
 
       <div class="chart-toolbar">
 
@@ -146,13 +150,26 @@
 
 
       <!-- =================================================
-           CHART CONTAINER
+           CHART
       ================================================== -->
 
       <div
         id="chart-screen"
         class="chart-screen"
       >
+
+        <div class="chart-screen-header">
+
+          <strong>
+            007
+          </strong>
+
+          <span id="chart-current-symbol">
+            EUR/USD
+          </span>
+
+        </div>
+
 
         <div class="tradingview-wrap">
 
@@ -165,19 +182,11 @@
 
       </div>
 
-
     </section>
 
   </main>
 
 </div>
-
-
-<!-- =====================================================
-     SUPABASE CONFIG
-====================================================== -->
-
-<script src="supabase-config.js"></script>
 
 
 <!-- =====================================================
