@@ -7,7 +7,7 @@
 
   <meta
     name="viewport"
-    content="width=device-width,initial-scale=1"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
   <meta
@@ -28,711 +28,834 @@
 
 <div class="app">
 
-<header>
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
 
-  <div class="brand">
-    PROP<span>DEMO</span>
-  </div>
+  <header>
 
-  <nav>
+    <div class="brand">
+      PROP<span>DEMO</span>
+    </div>
 
-    <button data-page="home">
-      Home
+    <nav>
+
+      <button data-page="home">
+        Home
+      </button>
+
+      <button data-page="accounts">
+        Accounts
+      </button>
+
+      <button data-page="dashboard">
+        Dashboard
+      </button>
+
+      <button data-page="terminal">
+        Terminal
+      </button>
+
+    </nav>
+
+    <button
+      id="logout"
+      class="ghost"
+    >
+      Logout
     </button>
 
-    <button data-page="accounts">
-      Accounts
-    </button>
-
-    <button data-page="dashboard">
-      Dashboard
-    </button>
-
-    <button data-page="terminal">
-      Terminal
-    </button>
-
-  </nav>
-
-  <button
-    id="logout"
-    class="ghost"
-  >
-    Logout
-  </button>
-
-</header>
+  </header>
 
 
-<main>
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main>
 
 
-<!-- AUTH -->
+    <!-- ===================================================
+         AUTH
+    ==================================================== -->
 
-<section
-  id="auth"
-  class="page active"
->
+    <section
+      id="auth"
+      class="page active"
+    >
 
-  <div class="auth-wrap">
+      <div class="auth-wrap">
 
-    <div class="auth-box panel">
+        <div class="auth-box panel">
 
-      <p class="eyebrow">
-        DEMO PROP-FIRM
-      </p>
+          <p class="eyebrow">
+            DEMO PROP-FIRM
+          </p>
 
-      <h2 id="auth-title">
-        Create your trader account
-      </h2>
+          <h2 id="auth-title">
+            Create your trader account
+          </h2>
 
-      <p class="muted">
-        Register or sign in to access
-        your trading dashboard.
-      </p>
+          <p class="muted">
+            Register or sign in to access your
+            virtual trading dashboard.
+          </p>
 
-      <div id="signup-fields">
+          <div id="signup-fields">
+
+            <label>
+              Full name
+            </label>
+
+            <input
+              id="auth-name"
+              type="text"
+              placeholder="Your name"
+            >
+
+          </div>
+
+          <label>
+            Email
+          </label>
+
+          <input
+            id="auth-email"
+            type="email"
+            placeholder="you@example.com"
+          >
+
+          <label>
+            Password
+          </label>
+
+          <input
+            id="auth-password"
+            type="password"
+            placeholder="At least 6 characters"
+          >
+
+          <button
+            id="auth-submit"
+            class="primary"
+          >
+            Create account
+          </button>
+
+          <button
+            id="auth-toggle"
+            class="ghost auth-toggle"
+          >
+            Already have an account? Login
+          </button>
+
+          <p
+            id="auth-msg"
+            class="msg"
+          ></p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         HOME
+    ==================================================== -->
+
+    <section
+      id="home"
+      class="page"
+    >
+
+      <div class="hero">
+
+        <div class="hero-content">
+
+          <p class="eyebrow">
+            DEMO PROP-FIRM COMPETITION
+          </p>
+
+          <h1>
+            Trade.
+            Compete.
+            <br>
+            <span>Prove Yourself.</span>
+          </h1>
+
+          <p class="muted hero-text">
+            Virtual trading with live market prices,
+            TradingView charts, risk rules, SL/TP
+            and real-time P&L.
+          </p>
+
+          <div class="hero-buttons">
+
+            <button
+              class="primary"
+              data-page="accounts"
+            >
+              Choose Account
+            </button>
+
+            <button
+              class="secondary"
+              data-page="terminal"
+            >
+              Open Terminal
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="hero-card">
+
+          <div class="status">
+            ● LIVE MARKET / VIRTUAL TRADING
+          </div>
+
+          <h3>
+            Risk Engine
+          </h3>
+
+          <div class="metric">
+            <span>
+              Daily Loss
+            </span>
+
+            <b>
+              5%
+            </b>
+          </div>
+
+          <div class="metric">
+            <span>
+              Max Drawdown
+            </span>
+
+            <b>
+              10%
+            </b>
+          </div>
+
+          <div class="metric">
+            <span>
+              Profit Target
+            </span>
+
+            <b>
+              8–10%
+            </b>
+          </div>
+
+          <div class="metric">
+            <span>
+              Trading
+            </span>
+
+            <b class="green">
+              VIRTUAL
+            </b>
+          </div>
+
+          <div class="market-mini">
+
+            <span id="home-symbol">
+              EUR/USD
+            </span>
+
+            <strong id="home-price">
+              Loading...
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="home-rules panel">
+
+        <div class="section-head">
+
+          <div>
+
+            <p class="eyebrow">
+              RULES
+            </p>
+
+            <h2>
+              Trading Rules
+            </h2>
+
+          </div>
+
+          <span class="badge">
+            AUTOMATIC
+          </span>
+
+        </div>
+
+        <div class="rules-grid">
+
+          <div class="rule-card">
+
+            <span class="rule-icon">
+              01
+            </span>
+
+            <h3>
+              Daily Loss
+            </h3>
+
+            <p class="muted">
+              Account daily loss limit
+              is automatically tracked.
+            </p>
+
+            <strong>
+              5%
+            </strong>
+
+          </div>
+
+
+          <div class="rule-card">
+
+            <span class="rule-icon">
+              02
+            </span>
+
+            <h3>
+              Max Drawdown
+            </h3>
+
+            <p class="muted">
+              Maximum account drawdown
+              is monitored automatically.
+            </p>
+
+            <strong>
+              10%
+            </strong>
+
+          </div>
+
+
+          <div class="rule-card">
+
+            <span class="rule-icon">
+              03
+            </span>
+
+            <h3>
+              Profit Target
+            </h3>
+
+            <p class="muted">
+              Reach the selected account
+              profit target.
+            </p>
+
+            <strong>
+              8–10%
+            </strong>
+
+          </div>
+
+
+          <div class="rule-card">
+
+            <span class="rule-icon">
+              04
+            </span>
+
+            <h3>
+              Virtual Trading
+            </h3>
+
+            <p class="muted">
+              Orders use virtual funds.
+              No real trades are placed.
+            </p>
+
+            <strong>
+              DEMO
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ACCOUNTS
+    ==================================================== -->
+
+    <section
+      id="accounts"
+      class="page"
+    >
+
+      <div class="section-head">
+
+        <div>
+
+          <p class="eyebrow">
+            STEP 1
+          </p>
+
+          <h2>
+            Choose your account
+          </h2>
+
+        </div>
+
+        <span class="badge">
+          100% FREE WITH COUPON
+        </span>
+
+      </div>
+
+      <div
+        id="account-grid"
+        class="grid"
+      ></div>
+
+      <div
+        id="coupon-box"
+        class="panel hidden"
+      >
+
+        <h3>
+          Activate account
+        </h3>
+
+        <p
+          id="selected-plan"
+          class="muted"
+        ></p>
 
         <label>
-          Full name
+          Coupon code
         </label>
 
         <input
-          id="auth-name"
-          type="text"
-          placeholder="Your name"
+          id="coupon"
+          placeholder="Try FRIENDS100"
         >
 
-      </div>
-
-      <label>
-        Email
-      </label>
-
-      <input
-        id="auth-email"
-        type="email"
-        placeholder="you@example.com"
-      >
-
-      <label>
-        Password
-      </label>
-
-      <input
-        id="auth-password"
-        type="password"
-        placeholder="At least 6 characters"
-      >
-
-      <button
-        id="auth-submit"
-        class="primary"
-      >
-        Create account
-      </button>
-
-      <button
-        id="auth-toggle"
-        class="ghost auth-toggle"
-      >
-        Already have an account? Login
-      </button>
-
-      <p
-        id="auth-msg"
-        class="msg"
-      ></p>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- HOME -->
-
-<section
-  id="home"
-  class="page"
->
-
-  <div class="hero">
-
-    <div class="hero-content">
-
-      <p class="eyebrow">
-        DEMO PROP-FIRM COMPETITION
-      </p>
-
-      <h1>
-        Trade.
-        Compete.
-        <br>
-        <span>
-          Prove Yourself.
-        </span>
-      </h1>
-
-      <p class="muted hero-text">
-        Real market data with virtual
-        trading, automatic risk rules,
-        SL/TP and trade management.
-      </p>
-
-      <div class="hero-buttons">
-
         <button
+          id="activate"
           class="primary"
-          data-page="accounts"
         >
-          Choose Account
+          Apply Coupon & Activate
         </button>
 
-        <button
-          class="secondary"
-          data-page="terminal"
-        >
-          Open Terminal
-        </button>
+        <p
+          id="coupon-msg"
+          class="msg"
+        ></p>
 
       </div>
 
-    </div>
+    </section>
 
 
-    <div class="hero-card">
+    <!-- ===================================================
+         DASHBOARD
+    ==================================================== -->
 
-      <div class="status">
-        ● LIVE MARKET / VIRTUAL TRADING
-      </div>
-
-      <h3>
-        Risk Engine
-      </h3>
-
-      <div class="metric">
-        <span>Daily Loss</span>
-        <b>5%</b>
-      </div>
-
-      <div class="metric">
-        <span>Max Drawdown</span>
-        <b>10%</b>
-      </div>
-
-      <div class="metric">
-        <span>Profit Target</span>
-        <b>8–10%</b>
-      </div>
-
-      <div class="metric">
-        <span>Trading</span>
-        <b class="green">
-          VIRTUAL
-        </b>
-      </div>
-
-      <div class="market-mini">
-
-        <span>
-          EUR/USD
-        </span>
-
-        <strong id="home-price">
-          Loading...
-        </strong>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div class="home-rules panel">
-
-    <div class="section-head">
-
-      <div>
-
-        <p class="eyebrow">
-          RULES
-        </p>
-
-        <h2>
-          Trading Rules
-        </h2>
-
-      </div>
-
-      <span class="badge">
-        AUTOMATIC
-      </span>
-
-    </div>
-
-
-    <div class="rules-grid">
-
-      <div class="rule-card">
-
-        <span class="rule-icon">
-          01
-        </span>
-
-        <h3>
-          Daily Loss
-        </h3>
-
-        <p class="muted">
-          Daily loss is tracked
-          automatically.
-        </p>
-
-        <strong>
-          5%
-        </strong>
-
-      </div>
-
-
-      <div class="rule-card">
-
-        <span class="rule-icon">
-          02
-        </span>
-
-        <h3>
-          Max Drawdown
-        </h3>
-
-        <p class="muted">
-          Maximum drawdown is
-          monitored automatically.
-        </p>
-
-        <strong>
-          10%
-        </strong>
-
-      </div>
-
-
-      <div class="rule-card">
-
-        <span class="rule-icon">
-          03
-        </span>
-
-        <h3>
-          Profit Target
-        </h3>
-
-        <p class="muted">
-          Reach the selected
-          account target.
-        </p>
-
-        <strong>
-          8–10%
-        </strong>
-
-      </div>
-
-
-      <div class="rule-card">
-
-        <span class="rule-icon">
-          04
-        </span>
-
-        <h3>
-          Virtual Trading
-        </h3>
-
-        <p class="muted">
-          All orders use virtual
-          funds.
-        </p>
-
-        <strong>
-          DEMO
-        </strong>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- ACCOUNTS -->
-
-<section
-  id="accounts"
-  class="page"
->
-
-  <div class="section-head">
-
-    <div>
-
-      <p class="eyebrow">
-        STEP 1
-      </p>
-
-      <h2>
-        Choose your account
-      </h2>
-
-    </div>
-
-    <span class="badge">
-      100% FREE WITH COUPON
-    </span>
-
-  </div>
-
-  <div
-    id="account-grid"
-    class="grid"
-  ></div>
-
-
-  <div
-    id="coupon-box"
-    class="panel hidden"
-  >
-
-    <h3>
-      Activate account
-    </h3>
-
-    <p
-      id="selected-plan"
-      class="muted"
-    ></p>
-
-    <label>
-      Coupon code
-    </label>
-
-    <input
-      id="coupon"
-      placeholder="Try FRIENDS100"
+    <section
+      id="dashboard"
+      class="page"
     >
 
-    <button
-      id="activate"
-      class="primary"
-    >
-      Apply Coupon & Activate
-    </button>
-
-    <p
-      id="coupon-msg"
-      class="msg"
-    ></p>
-
-  </div>
-
-</section>
-
-
-<!-- DASHBOARD -->
-
-<section
-  id="dashboard"
-  class="page"
->
-
-  <div class="section-head">
-
-    <div>
-
-      <p class="eyebrow">
-        TRADER DASHBOARD
-      </p>
-
-      <h2 id="account-title">
-        No account
-      </h2>
-
-    </div>
-
-    <span
-      id="account-status"
-      class="badge"
-    >
-      INACTIVE
-    </span>
-
-  </div>
-
-
-  <div class="stats">
-
-    <div class="stat">
-      <span>Balance</span>
-      <strong id="balance">
-        $0.00
-      </strong>
-    </div>
-
-    <div class="stat">
-      <span>Equity</span>
-      <strong id="equity">
-        $0.00
-      </strong>
-    </div>
-
-    <div class="stat">
-      <span>Total P&L</span>
-      <strong id="pnl">
-        $0.00
-      </strong>
-    </div>
-
-    <div class="stat">
-      <span>Drawdown</span>
-      <strong id="dd">
-        $0.00
-      </strong>
-    </div>
-
-  </div>
-
-
-  <div class="two-col">
-
-    <div class="panel">
-
-      <h3>
-        Rules
-      </h3>
-
-      <div id="rules"></div>
-
-    </div>
-
-
-    <div class="panel">
-
-      <h3>
-        Account status
-      </h3>
-
-      <div
-        id="status-detail"
-        class="callout"
-      >
-        Activate an account to start.
-      </div>
-
-      <button
-        class="primary"
-        data-page="terminal"
-      >
-        Open Terminal
-      </button>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- TERMINAL -->
-
-<section
-  id="terminal"
-  class="page"
->
-
-  <div class="section-head">
-
-    <div>
-
-      <p class="eyebrow">
-        LIVE MARKET TERMINAL
-      </p>
-
-      <h2>
-        Trading Desk
-      </h2>
-
-    </div>
-
-    <span class="badge">
-      VIRTUAL FUNDS
-    </span>
-
-  </div>
-
-
-  <!-- SYMBOL BAR -->
-
-  <div class="symbol-toolbar panel">
-
-    <div class="market-categories">
-
-      <button
-        class="category-btn active"
-        data-category="all"
-      >
-        All
-      </button>
-
-      <button
-        class="category-btn"
-        data-category="forex"
-      >
-        Forex
-      </button>
-
-      <button
-        class="category-btn"
-        data-category="crypto"
-      >
-        Crypto
-      </button>
-
-      <button
-        class="category-btn"
-        data-category="metals"
-      >
-        Metals
-      </button>
-
-    </div>
-
-
-    <input
-      id="symbol-search"
-      class="symbol-search"
-      placeholder="Search EUR/USD, BTC/USD, Gold..."
-    >
-
-  </div>
-
-
-  <div
-    id="symbol-list"
-    class="symbol-list"
-  ></div>
-
-
-  <!-- MARKET HEADER -->
-
-  <div class="market-bar panel">
-
-    <div>
-
-      <span
-        id="market-symbol"
-        class="market-symbol"
-      >
-        EUR/USD
-      </span>
-
-      <span
-        id="market-status"
-        class="market-live"
-      >
-        ● CONNECTING
-      </span>
-
-    </div>
-
-
-    <div class="market-price-box">
-
-      <strong id="market-price">
-        Loading...
-      </strong>
-
-      <span id="market-change">
-        Loading...
-      </span>
-
-    </div>
-
-  </div>
-
-
-  <div class="terminal">
-
-
-    <!-- CHART -->
-
-    <div class="chart">
-
-      <div
-        id="tradingview-widget"
-        class="tradingview-container"
-      ></div>
-
-    </div>
-
-
-    <!-- ORDER PANEL -->
-
-    <div class="order-panel">
-
-      <h3>
-        New Virtual Order
-      </h3>
-
-      <div class="virtual-warning">
-        VIRTUAL ONLY
-      </div>
-
-
-      <label>
-        Symbol
-      </label>
-
-      <select id="symbol"></select>
-
-
-      <label>
-        Side
-      </label>
-
-      <select id="side">
-
-        <option value="BUY">
-          BUY
-        </option>
-
-        <option value="SELL">
-          SELL
-        </option>
-
-      </select>
-
-
-      <label>
-        Position size
-      </label>
-
-      <input
-        id="size"
-        type="number"
-        min="0.01"
-        step="0.01"
-        value="0.10"
-      >
-
-
-      <div class="sl-tp-grid">
+      <div class="section-head">
 
         <div>
+
+          <p class="eyebrow">
+            TRADER DASHBOARD
+          </p>
+
+          <h2 id="account-title">
+            No account
+          </h2>
+
+        </div>
+
+        <span
+          id="account-status"
+          class="badge"
+        >
+          INACTIVE
+        </span>
+
+      </div>
+
+
+      <div class="stats">
+
+        <div class="stat">
+
+          <span>
+            Balance
+          </span>
+
+          <strong id="balance">
+            $0.00
+          </strong>
+
+        </div>
+
+        <div class="stat">
+
+          <span>
+            Equity
+          </span>
+
+          <strong id="equity">
+            $0.00
+          </strong>
+
+        </div>
+
+        <div class="stat">
+
+          <span>
+            Total P&L
+          </span>
+
+          <strong id="pnl">
+            $0.00
+          </strong>
+
+        </div>
+
+        <div class="stat">
+
+          <span>
+            Drawdown
+          </span>
+
+          <strong id="dd">
+            $0.00
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="two-col">
+
+        <div class="panel">
+
+          <h3>
+            Rules
+          </h3>
+
+          <div id="rules"></div>
+
+        </div>
+
+
+        <div class="panel">
+
+          <h3>
+            Account status
+          </h3>
+
+          <div
+            id="status-detail"
+            class="callout"
+          >
+            Activate an account to start.
+          </div>
+
+          <button
+            class="primary"
+            data-page="terminal"
+          >
+            Open Terminal
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         TERMINAL
+    ==================================================== -->
+
+    <section
+      id="terminal"
+      class="page"
+    >
+
+      <div class="section-head">
+
+        <div>
+
+          <p class="eyebrow">
+            LIVE MARKET / VIRTUAL EXECUTION
+          </p>
+
+          <h2>
+            Trading Desk
+          </h2>
+
+        </div>
+
+        <span class="badge">
+          VIRTUAL FUNDS
+        </span>
+
+      </div>
+
+
+      <!-- MARKET BAR -->
+
+      <div class="market-bar panel">
+
+        <div>
+
+          <span
+            id="market-symbol"
+            class="market-symbol"
+          >
+            EUR/USD
+          </span>
+
+          <span
+            id="market-status"
+            class="market-live"
+          >
+            ● CONNECTING
+          </span>
+
+        </div>
+
+        <div class="market-price-box">
+
+          <strong id="market-price">
+            Loading...
+          </strong>
+
+          <span id="market-change">
+            Loading...
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- FULL SCREEN CHART -->
+
+      <div
+        id="chart-screen"
+        class="chart-screen"
+      >
+
+        <div class="chart-screen-header">
+
+          <strong>
+            Live Chart
+          </strong>
+
+          <button
+            id="chart-fullscreen"
+            class="chart-fullscreen"
+          >
+            ⛶ Full Screen
+          </button>
+
+        </div>
+
+        <div class="tradingview-wrap">
+
+          <div
+            id="tradingview-widget"
+            class="tradingview-container"
+          ></div>
+
+
+          <!-- LIVE P&L OVERLAY -->
+
+          <div
+            id="chart-pnl"
+            class="chart-pnl hidden"
+          >
+
+            <div class="chart-pnl-title">
+              OPEN POSITION
+            </div>
+
+            <div class="chart-pnl-symbol">
+
+              <span id="chart-pnl-side">
+                BUY
+              </span>
+
+              <span id="chart-pnl-symbol">
+                EUR/USD
+              </span>
+
+            </div>
+
+            <div
+              id="chart-pnl-value"
+              class="chart-pnl-value"
+            >
+              +$0.00
+            </div>
+
+            <div class="chart-pnl-details">
+
+              <span>
+                Entry
+                <b id="chart-pnl-entry">
+                  -
+                </b>
+              </span>
+
+              <span>
+                Current
+                <b id="chart-pnl-current">
+                  -
+                </b>
+              </span>
+
+              <span>
+                SL
+                <b id="chart-pnl-sl">
+                  -
+                </b>
+              </span>
+
+              <span>
+                TP
+                <b id="chart-pnl-tp">
+                  -
+                </b>
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ORDER + POSITIONS -->
+
+      <div class="terminal-grid">
+
+
+        <!-- ORDER PANEL -->
+
+        <div class="order-panel">
+
+          <h3>
+            New Virtual Order
+          </h3>
+
+          <div class="virtual-warning">
+            VIRTUAL ONLY
+          </div>
+
+
+          <label>
+            Symbol
+          </label>
+
+          <select id="symbol">
+
+            <optgroup label="Forex">
+
+              <option value="EUR/USD">
+                EUR/USD
+              </option>
+
+              <option value="GBP/USD">
+                GBP/USD
+              </option>
+
+              <option value="USD/JPY">
+                USD/JPY
+              </option>
+
+              <option value="USD/CHF">
+                USD/CHF
+              </option>
+
+              <option value="AUD/USD">
+                AUD/USD
+              </option>
+
+              <option value="USD/CAD">
+                USD/CAD
+              </option>
+
+            </optgroup>
+
+
+            <optgroup label="Gold">
+
+              <option value="XAU/USD">
+                XAU/USD
+              </option>
+
+            </optgroup>
+
+
+            <optgroup label="Crypto">
+
+              <option value="BTC/USD">
+                BTC/USD
+              </option>
+
+              <option value="ETH/USD">
+                ETH/USD
+              </option>
+
+              <option value="SOL/USD">
+                SOL/USD
+              </option>
+
+            </optgroup>
+
+          </select>
+
+
+          <label>
+            Position size
+          </label>
+
+          <input
+            id="size"
+            type="number"
+            min="0.01"
+            step="0.01"
+            value="0.10"
+          >
+
 
           <label>
             Stop Loss
@@ -745,10 +868,6 @@
             placeholder="Optional"
           >
 
-        </div>
-
-
-        <div>
 
           <label>
             Take Profit
@@ -761,126 +880,133 @@
             placeholder="Optional"
           >
 
+
+          <div class="actions">
+
+            <button
+              id="buy"
+              class="primary"
+            >
+              BUY
+            </button>
+
+            <button
+              id="sell"
+              class="secondary"
+            >
+              SELL
+            </button>
+
+          </div>
+
+
+          <p
+            id="trade-msg"
+            class="msg"
+          ></p>
+
+
+          <div class="order-info">
+
+            <span>
+              Market
+            </span>
+
+            <b>
+              Live
+            </b>
+
+            <span>
+              Execution
+            </span>
+
+            <b>
+              Virtual
+            </b>
+
+            <span>
+              Broker
+            </span>
+
+            <b>
+              Demo
+            </b>
+
+          </div>
+
+        </div>
+
+
+        <!-- OPEN POSITIONS -->
+
+        <div class="positions-panel panel">
+
+          <div class="section-head compact">
+
+            <div>
+
+              <p class="eyebrow">
+                POSITIONS
+              </p>
+
+              <h3>
+                Open Trades
+              </h3>
+
+            </div>
+
+            <span
+              id="open-count"
+              class="badge"
+            >
+              0 OPEN
+            </span>
+
+          </div>
+
+
+          <div id="open-trades">
+
+            <div class="history-empty">
+              No open trades.
+            </div>
+
+          </div>
+
         </div>
 
       </div>
 
 
-      <div class="actions">
+      <!-- TRADE HISTORY -->
 
-        <button
-          id="buy"
-          class="primary"
-        >
-          BUY
-        </button>
+      <div class="panel">
 
-        <button
-          id="sell"
-          class="secondary"
-        >
-          SELL
-        </button>
+        <div class="section-head compact">
 
-      </div>
+          <div>
 
+            <p class="eyebrow">
+              ACTIVITY
+            </p>
 
-      <p
-        id="trade-msg"
-        class="msg"
-      ></p>
+            <h3>
+              Trade History
+            </h3>
 
+          </div>
 
-      <div class="order-info">
+        </div>
 
-        <span>
-          Market
-        </span>
-
-        <b>
-          Live
-        </b>
-
-        <span>
-          Execution
-        </span>
-
-        <b>
-          Virtual
-        </b>
-
-        <span>
-          Broker
-        </span>
-
-        <b>
-          Demo
-        </b>
+        <div id="history">
+          No trades yet.
+        </div>
 
       </div>
 
-    </div>
+    </section>
 
-  </div>
-
-
-  <!-- OPEN TRADES -->
-
-  <div class="panel">
-
-    <div class="section-head compact">
-
-      <div>
-
-        <p class="eyebrow">
-          POSITIONS
-        </p>
-
-        <h3>
-          Open Trades
-        </h3>
-
-      </div>
-
-    </div>
-
-    <div id="open-trades">
-      No open trades.
-    </div>
-
-  </div>
-
-
-  <!-- HISTORY -->
-
-  <div class="panel">
-
-    <div class="section-head compact">
-
-      <div>
-
-        <p class="eyebrow">
-          ACTIVITY
-        </p>
-
-        <h3>
-          Trade History
-        </h3>
-
-      </div>
-
-    </div>
-
-    <div id="history">
-      No trades yet.
-    </div>
-
-  </div>
-
-
-</section>
-
-</main>
+  </main>
 
 </div>
 
