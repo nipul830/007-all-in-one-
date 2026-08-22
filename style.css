@@ -94,7 +94,7 @@ header{
 
   align-items:center;
 
-  gap:18px;
+  gap:12px;
 
   min-height:54px;
 
@@ -163,6 +163,56 @@ header{
 }
 
 
+/* =====================================================
+   PINE EDITOR BUTTON
+===================================================== */
+
+.pine-editor-button{
+
+  border:
+    1px
+    solid
+    var(--border);
+
+  background:#151a23;
+
+  color:#eef2f7;
+
+  border-radius:9px;
+
+  padding:
+    9px
+    13px;
+
+  cursor:pointer;
+
+  transition:
+    background
+    .2s
+    ease,
+    border-color
+    .2s
+    ease;
+
+  white-space:nowrap;
+
+}
+
+
+.pine-editor-button:hover{
+
+  background:#202734;
+
+  border-color:
+    #394354;
+
+}
+
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
 .chart-fullscreen{
 
   border:
@@ -186,6 +236,8 @@ header{
     background
     .2s
     ease;
+
+  white-space:nowrap;
 
 }
 
@@ -505,7 +557,7 @@ select:focus{
 
   header{
 
-    gap:10px;
+    gap:7px;
 
     padding-bottom:8px;
 
@@ -526,13 +578,14 @@ select:focus{
   }
 
 
+  .pine-editor-button,
   .chart-fullscreen{
 
     padding:
       8px
-      10px;
+      9px;
 
-    font-size:12px;
+    font-size:11px;
 
   }
 
@@ -614,6 +667,25 @@ select:focus{
   }
 
 
+  header{
+
+    gap:6px;
+
+  }
+
+
+  .pine-editor-button,
+  .chart-fullscreen{
+
+    padding:
+      7px
+      8px;
+
+    font-size:10px;
+
+  }
+
+
   .chart-toolbar{
 
     align-items:
@@ -685,13 +757,14 @@ select:focus{
   }
 
 
+  .pine-editor-button,
   .chart-fullscreen{
 
     padding:
       6px
       9px;
 
-    font-size:11px;
+    font-size:10px;
 
   }
 
