@@ -23,9 +23,13 @@
 
 }
 
+
 *{
+
   box-sizing:border-box;
+
 }
+
 
 html,
 body{
@@ -37,6 +41,7 @@ body{
   min-height:100%;
 
 }
+
 
 body{
 
@@ -55,6 +60,7 @@ body{
 
 }
 
+
 button,
 select,
 textarea{
@@ -63,11 +69,18 @@ textarea{
 
 }
 
+
 button{
 
-  -webkit-tap-highlight-color:transparent;
+  -webkit-tap-highlight-color:
+    transparent;
 
 }
+
+
+/* =====================================================
+   APP
+===================================================== */
 
 .app{
 
@@ -100,6 +113,7 @@ header{
 
 }
 
+
 .brand{
 
   font-size:24px;
@@ -110,7 +124,10 @@ header{
 
   color:#fff;
 
+  white-space:nowrap;
+
 }
+
 
 .chart-header-status{
 
@@ -120,6 +137,8 @@ header{
 
   gap:7px;
 
+  flex:1;
+
   color:var(--muted);
 
   font-size:11px;
@@ -128,9 +147,8 @@ header{
 
   letter-spacing:.05em;
 
-  flex:1;
-
 }
+
 
 .live-dot{
 
@@ -153,6 +171,7 @@ header{
 
 }
 
+
 .toolbar-button{
 
   border:
@@ -165,13 +184,16 @@ header{
 
   border-radius:9px;
 
-  padding:8px 12px;
+  padding:
+    8px
+    12px;
 
   cursor:pointer;
 
   white-space:nowrap;
 
 }
+
 
 .toolbar-button:hover{
 
@@ -181,7 +203,7 @@ header{
 
 
 /* =====================================================
-   TOOLBAR
+   MARKET TOOLBAR
 ===================================================== */
 
 .chart-toolbar{
@@ -196,7 +218,9 @@ header{
 
   margin-bottom:8px;
 
-  padding:10px 13px;
+  padding:
+    10px
+    13px;
 
   background:
     rgba(
@@ -214,6 +238,7 @@ header{
 
 }
 
+
 .symbol-info{
 
   display:flex;
@@ -224,6 +249,7 @@ header{
 
 }
 
+
 .symbol-info strong{
 
   font-size:19px;
@@ -231,6 +257,7 @@ header{
   font-weight:900;
 
 }
+
 
 .symbol-info span{
 
@@ -242,11 +269,13 @@ header{
 
 }
 
+
 .chart-actions{
 
   width:190px;
 
 }
+
 
 select{
 
@@ -262,9 +291,19 @@ select{
 
   border-radius:9px;
 
-  padding:9px 11px;
+  padding:
+    9px
+    11px;
 
   outline:none;
+
+}
+
+
+select:focus{
+
+  border-color:
+    var(--accent);
 
 }
 
@@ -300,6 +339,7 @@ select{
 
 }
 
+
 .chart-screen-header{
 
   height:34px;
@@ -312,7 +352,9 @@ select{
 
   justify-content:space-between;
 
-  padding:0 13px;
+  padding:
+    0
+    13px;
 
   background:#0d1118;
 
@@ -324,17 +366,20 @@ select{
 
 }
 
+
 .chart-screen-header strong{
 
   color:#fff;
 
 }
 
+
 .chart-screen-header span{
 
   color:var(--muted);
 
 }
+
 
 .chart-wrap{
 
@@ -348,6 +393,7 @@ select{
 
 }
 
+
 .chart{
 
   width:100%;
@@ -355,6 +401,7 @@ select{
   height:100%;
 
 }
+
 
 .chart-message{
 
@@ -376,74 +423,16 @@ select{
 
   pointer-events:none;
 
+  text-align:center;
+
+  max-width:90%;
+
 }
+
 
 .chart-message.hidden{
 
   display:none;
-
-}
-
-
-/* =====================================================
-   SIGNAL LAYER
-===================================================== */
-
-.signal-layer{
-
-  position:absolute;
-
-  inset:0;
-
-  pointer-events:none;
-
-}
-
-.signal-marker{
-
-  position:absolute;
-
-  transform:
-    translateX(
-      -50%
-    );
-
-  padding:
-    4px
-    7px;
-
-  border-radius:5px;
-
-  font-size:9px;
-
-  font-weight:900;
-
-  letter-spacing:.04em;
-
-  box-shadow:
-    0 3px 12px
-    rgba(
-      0,
-      0,
-      0,
-      .35
-    );
-
-}
-
-.signal-buy{
-
-  background:var(--green);
-
-  color:#06150d;
-
-}
-
-.signal-sell{
-
-  background:var(--red);
-
-  color:#21070b;
 
 }
 
@@ -501,6 +490,7 @@ select{
 
 }
 
+
 .pine-panel.open{
 
   transform:
@@ -509,6 +499,7 @@ select{
     );
 
 }
+
 
 .pine-header{
 
@@ -530,6 +521,7 @@ select{
 
 }
 
+
 .pine-header strong{
 
   display:block;
@@ -537,6 +529,7 @@ select{
   font-size:17px;
 
 }
+
 
 .pine-header span{
 
@@ -549,6 +542,7 @@ select{
   font-size:10px;
 
 }
+
 
 .close-button{
 
@@ -569,6 +563,7 @@ select{
   cursor:pointer;
 
 }
+
 
 #pine-code{
 
@@ -602,6 +597,7 @@ select{
 
 }
 
+
 .pine-actions{
 
   display:flex;
@@ -615,6 +611,7 @@ select{
     var(--border);
 
 }
+
 
 .run-button,
 .secondary-button{
@@ -633,6 +630,7 @@ select{
 
 }
 
+
 .run-button{
 
   background:
@@ -644,11 +642,13 @@ select{
 
 }
 
+
 .secondary-button{
 
   background:#202734;
 
 }
+
 
 .pine-status{
 
@@ -668,17 +668,20 @@ select{
 
 }
 
+
 .pine-status.error{
 
   color:var(--red);
 
 }
 
+
 .pine-status.success{
 
   color:var(--green);
 
 }
+
 
 .pine-help{
 
@@ -697,6 +700,7 @@ select{
     var(--border);
 
 }
+
 
 .pine-help code{
 
@@ -729,6 +733,7 @@ select{
 
   }
 
+
   header{
 
     gap:6px;
@@ -737,17 +742,20 @@ select{
 
   }
 
+
   .brand{
 
     font-size:20px;
 
   }
 
+
   .chart-header-status{
 
     font-size:9px;
 
   }
+
 
   .toolbar-button{
 
@@ -759,11 +767,13 @@ select{
 
   }
 
+
   .chart-toolbar{
 
     padding:8px;
 
   }
+
 
   .symbol-info{
 
@@ -771,17 +781,20 @@ select{
 
   }
 
+
   .symbol-info strong{
 
     font-size:16px;
 
   }
 
+
   .chart-actions{
 
     width:145px;
 
   }
+
 
   select{
 
@@ -790,6 +803,7 @@ select{
     font-size:11px;
 
   }
+
 
   .chart-screen{
 
@@ -806,6 +820,7 @@ select{
 
 }
 
+
 @media(max-width:450px){
 
   .chart-header-status{
@@ -813,6 +828,7 @@ select{
     display:none;
 
   }
+
 
   .chart-toolbar{
 
@@ -822,11 +838,13 @@ select{
 
   }
 
+
   .chart-actions{
 
     width:100%;
 
   }
+
 
   .chart-screen{
 
@@ -838,6 +856,11 @@ select{
   }
 
 }
+
+
+/* =====================================================
+   LANDSCAPE
+===================================================== */
 
 @media(
   orientation:landscape
@@ -851,17 +874,20 @@ select{
 
   }
 
+
   header{
 
     height:32px;
 
   }
 
+
   .brand{
 
     font-size:16px;
 
   }
+
 
   .chart-screen{
 
@@ -873,6 +899,7 @@ select{
     min-height:260px;
 
   }
+
 
   .chart-screen-header{
 
@@ -895,17 +922,26 @@ select{
 
   height:100vh;
 
+  min-height:100vh;
+
+  margin:0;
+
   border:0;
 
   border-radius:0;
 
 }
 
+
 #chart-screen:-webkit-full-screen{
 
   width:100vw;
 
   height:100vh;
+
+  min-height:100vh;
+
+  margin:0;
 
   border:0;
 
