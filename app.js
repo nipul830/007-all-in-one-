@@ -20,6 +20,12 @@ const fullscreenButton =
   );
 
 
+const pineEditorButton =
+  document.getElementById(
+    "pine-editor"
+  );
+
+
 const symbolSelect =
   document.getElementById(
     "symbol"
@@ -293,6 +299,27 @@ symbolSelect?.addEventListener(
 
 
 // =====================================================
+// PINE EDITOR
+// =====================================================
+
+pineEditorButton?.addEventListener(
+  "click",
+  () => {
+
+    const pineEditorUrl =
+      "https://www.tradingview.com/pine-script-docs/";
+
+    window.open(
+      pineEditorUrl,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+  }
+);
+
+
+// =====================================================
 // FULLSCREEN
 // =====================================================
 
@@ -321,12 +348,6 @@ async function enterFullscreen(){
 
     }
 
-
-    // Try to lock landscape.
-    // Some mobile browsers do not allow
-    // orientation locking from a normal
-    // webpage. In that case fullscreen
-    // still works normally.
 
     if(
       screen.orientation &&
@@ -450,7 +471,7 @@ fullscreenButton?.addEventListener(
 
 
 // =====================================================
-// UPDATE BUTTON
+// UPDATE FULLSCREEN BUTTON
 // =====================================================
 
 function updateFullscreenButton(){
