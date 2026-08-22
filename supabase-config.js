@@ -1,7 +1,3 @@
-// =====================================================
-// SUPABASE CONFIG
-// =====================================================
-
 const SUPABASE_URL =
   "https://gwvhuegpkziujcyqzcra.supabase.co";
 
