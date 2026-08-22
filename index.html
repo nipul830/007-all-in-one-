@@ -1,8 +1,6 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -10,59 +8,41 @@
     content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
 
-  <meta
-    name="theme-color"
-    content="#090b10"
-  >
+  <meta name="theme-color" content="#090b10">
 
   <title>007 Live Chart</title>
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+  <link rel="stylesheet" href="style.css">
 
+  <script
+    src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"
+  ></script>
 </head>
 
 <body>
 
 <div class="app">
 
-  <!-- =====================================================
-       HEADER
-  ====================================================== -->
-
   <header>
 
-    <div class="brand">
-      007
-    </div>
+    <div class="brand">007</div>
 
     <div class="chart-header-status">
-
       <span class="live-dot"></span>
-
       LIVE CHART
-
     </div>
-
-
-    <!-- PINE EDITOR -->
 
     <button
       id="pine-editor"
-      class="pine-editor-button"
+      class="toolbar-button"
       type="button"
     >
       </> Pine Editor
     </button>
 
-
-    <!-- FULLSCREEN -->
-
     <button
       id="chart-fullscreen"
-      class="chart-fullscreen"
+      class="toolbar-button"
       type="button"
     >
       ⛶ Full Screen
@@ -71,20 +51,9 @@
   </header>
 
 
-  <!-- =====================================================
-       MAIN CHART
-  ====================================================== -->
-
   <main>
 
-    <section
-      id="terminal"
-      class="chart-page"
-    >
-
-      <!-- =================================================
-           CHART TOOLBAR
-      ================================================== -->
+    <section class="chart-page">
 
       <div class="chart-toolbar">
 
@@ -95,7 +64,7 @@
           </strong>
 
           <span id="market-status">
-            ● LIVE
+            ● CONNECTING
           </span>
 
         </div>
@@ -106,57 +75,22 @@
           <select id="symbol">
 
             <optgroup label="Forex">
-
-              <option value="EUR/USD">
-                EUR/USD
-              </option>
-
-              <option value="GBP/USD">
-                GBP/USD
-              </option>
-
-              <option value="USD/JPY">
-                USD/JPY
-              </option>
-
-              <option value="USD/CHF">
-                USD/CHF
-              </option>
-
-              <option value="AUD/USD">
-                AUD/USD
-              </option>
-
-              <option value="USD/CAD">
-                USD/CAD
-              </option>
-
+              <option value="EUR/USD">EUR/USD</option>
+              <option value="GBP/USD">GBP/USD</option>
+              <option value="USD/JPY">USD/JPY</option>
+              <option value="USD/CHF">USD/CHF</option>
+              <option value="AUD/USD">AUD/USD</option>
+              <option value="USD/CAD">USD/CAD</option>
             </optgroup>
-
 
             <optgroup label="Gold">
-
-              <option value="XAU/USD">
-                XAU/USD
-              </option>
-
+              <option value="XAU/USD">XAU/USD</option>
             </optgroup>
 
-
             <optgroup label="Crypto">
-
-              <option value="BTC/USD">
-                BTC/USD
-              </option>
-
-              <option value="ETH/USD">
-                ETH/USD
-              </option>
-
-              <option value="SOL/USD">
-                SOL/USD
-              </option>
-
+              <option value="BTC/USD">BTC/USD</option>
+              <option value="ETH/USD">ETH/USD</option>
+              <option value="SOL/USD">SOL/USD</option>
             </optgroup>
 
           </select>
@@ -166,10 +100,6 @@
       </div>
 
 
-      <!-- =================================================
-           CHART
-      ================================================== -->
-
       <div
         id="chart-screen"
         class="chart-screen"
@@ -177,9 +107,7 @@
 
         <div class="chart-screen-header">
 
-          <strong>
-            007
-          </strong>
+          <strong>007</strong>
 
           <span id="chart-current-symbol">
             EUR/USD
@@ -188,11 +116,25 @@
         </div>
 
 
-        <div class="tradingview-wrap">
+        <div class="chart-wrap">
 
           <div
-            id="tradingview-widget"
-            class="tradingview-container"
+            id="chart"
+            class="chart"
+          ></div>
+
+
+          <div
+            id="chart-message"
+            class="chart-message"
+          >
+            Loading market data...
+          </div>
+
+
+          <div
+            id="signal-layer"
+            class="signal-layer"
           ></div>
 
         </div>
@@ -206,11 +148,118 @@
 </div>
 
 
-<script
-  type="module"
-  src="app.js"
-></script>
+<!-- =====================================================
+     PINE EDITOR
+===================================================== -->
+
+<div
+  id="pine-panel"
+  class="pine-panel"
+  aria-hidden="true"
+>
+
+  <div class="pine-header">
+
+    <div>
+
+      <strong>Pine Editor</strong>
+
+      <span>
+        007 Independent Engine
+      </span>
+
+    </div>
+
+    <button
+      id="pine-close"
+      class="close-button"
+      type="button"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <textarea
+    id="pine-code"
+    spellcheck="false"
+  >//@version=5
+indicator("007 EMA Signal")
+
+fast = ta.ema(close, 9)
+slow = ta.ema(close, 21)
+
+buySignal = ta.crossover(fast, slow)
+sellSignal = ta.crossunder(fast, slow)
+
+plot(fast)
+plot(slow)
+
+plotshape(buySignal, title="BUY", style=shape.triangleup)
+plotshape(sellSignal, title="SELL", style=shape.triangledown)</textarea>
+
+
+  <div class="pine-actions">
+
+    <button
+      id="pine-run"
+      class="run-button"
+      type="button"
+    >
+      ▶ Run
+    </button>
+
+    <button
+      id="pine-clear"
+      class="secondary-button"
+      type="button"
+    >
+      Clear
+    </button>
+
+  </div>
+
+
+  <div
+    id="pine-status"
+    class="pine-status"
+  >
+    Ready.
+  </div>
+
+
+  <div class="pine-help">
+
+    <strong>Supported:</strong>
+
+    <code>close</code>
+    <code>open</code>
+    <code>high</code>
+    <code>low</code>
+
+    <br>
+
+    <code>ta.sma()</code>
+    <code>ta.ema()</code>
+    <code>ta.rsi()</code>
+
+    <br>
+
+    <code>ta.crossover()</code>
+    <code>ta.crossunder()</code>
+
+    <br>
+
+    <code>plot()</code>
+    <code>plotshape()</code>
+
+  </div>
+
+</div>
+
+
+<script type="module" src="app.js"></script>
 
 </body>
-
 </html>
