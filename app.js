@@ -1,15 +1,11 @@
 // =====================================================
-// 007 CUSTOM LIVE CHART
-// INDEPENDENT PINE-COMPATIBLE INDICATOR ENGINE
+// 007 LIVE CUSTOM CHART
 // =====================================================
 
 
 // =====================================================
 // CONFIG
 // =====================================================
-
-const SUPABASE_URL =
-  "https://gwvhuegpkziujcyqzcra.supabase.co";
 
 const SUPABASE_FUNCTION =
   "clever-function";
@@ -24,6 +20,11 @@ const DEFAULT_INTERVAL =
 // =====================================================
 // ELEMENTS
 // =====================================================
+
+const chartScreen =
+  document.getElementById(
+    "chart-screen"
+  );
 
 const chartElement =
   document.getElementById(
@@ -45,7 +46,7 @@ const marketStatus =
     "market-status"
   );
 
-const currentSymbol =
+const currentSymbolElement =
   document.getElementById(
     "chart-current-symbol"
   );
@@ -111,15 +112,13 @@ let currentSymbol =
 
 let indicatorLines = [];
 
-let signalMarkers = [];
-
-let currentScript = "";
+let currentMarkers = [];
 
 let refreshTimer = null;
 
 
 // =====================================================
-// LOCAL STORAGE
+// STORAGE
 // =====================================================
 
 const SCRIPT_KEY =
@@ -130,10 +129,10 @@ const SYMBOL_KEY =
 
 
 // =====================================================
-// SYMBOL HELPERS
+// SYMBOL STORAGE
 // =====================================================
 
-function getSavedSymbol(){
+function loadSavedSymbol(){
 
   return (
     localStorage.getItem(
@@ -144,7 +143,10 @@ function getSavedSymbol(){
 
 }
 
-function saveSymbol(symbol){
+
+function saveSymbol(
+  symbol
+){
 
   localStorage.setItem(
     SYMBOL_KEY,
@@ -155,7 +157,7 @@ function saveSymbol(symbol){
 
 
 // =====================================================
-// PINE SCRIPT STORAGE
+// SCRIPT STORAGE
 // =====================================================
 
 function loadSavedScript(){
@@ -165,7 +167,7 @@ function loadSavedScript(){
       SCRIPT_KEY
     );
 
-  if(saved){
+  if(saved !== null){
 
     pineCode.value =
       saved;
@@ -173,6 +175,7 @@ function loadSavedScript(){
   }
 
 }
+
 
 function saveScript(){
 
@@ -185,18 +188,30 @@ function saveScript(){
 
 
 // =====================================================
-// CHART INITIALIZE
+// CHART CREATE
 // =====================================================
 
 function createChart(){
 
   if(
-    !chartElement ||
-    typeof LightweightCharts ===
-      "undefined"
+    !chartElement
   ){
 
-    return;
+    throw new Error(
+      "Chart element missing"
+    );
+
+  }
+
+
+  if(
+    typeof LightweightCharts ===
+    "undefined"
+  ){
+
+    throw new Error(
+      "Chart library failed to load"
+    );
 
   }
 
@@ -214,6 +229,7 @@ function createChart(){
           textColor:"#8e98a8"
         },
 
+
         grid:{
           vertLines:{
             color:"#151b24"
@@ -224,9 +240,11 @@ function createChart(){
           }
         },
 
+
         rightPriceScale:{
           borderColor:"#242b36"
         },
+
 
         timeScale:{
           borderColor:"#242b36",
@@ -236,17 +254,25 @@ function createChart(){
           secondsVisible:false
         },
 
+
         crosshair:{
           mode:
-            LightweightCharts.CrosshairMode
+            LightweightCharts
+              .CrosshairMode
               .Normal
         },
+
 
         handleScroll:{
           mouseWheel:true,
 
-          pressedMouseMove:true
+          pressedMouseMove:true,
+
+          horzTouchDrag:true,
+
+          vertTouchDrag:true
         },
+
 
         handleScale:{
           mouseWheel:true,
@@ -263,28 +289,38 @@ function createChart(){
   candleSeries =
     chart.addCandlestickSeries({
 
-      upColor:"#63d29a",
+      upColor:
+        "#63d29a",
 
-      downColor:"#ff6b7a",
+      downColor:
+        "#ff6b7a",
 
-      borderUpColor:"#63d29a",
+      borderUpColor:
+        "#63d29a",
 
-      borderDownColor:"#ff6b7a",
+      borderDownColor:
+        "#ff6b7a",
 
-      wickUpColor:"#63d29a",
+      wickUpColor:
+        "#63d29a",
 
-      wickDownColor:"#ff6b7a"
+      wickDownColor:
+        "#ff6b7a"
 
     });
 
 
-  new ResizeObserver(
-    () => {
+  const observer =
+    new ResizeObserver(
+      () => {
 
-      resizeChart();
+        resizeChart();
 
-    }
-  ).observe(
+      }
+    );
+
+
+  observer.observe(
     chartElement
   );
 
@@ -307,9 +343,26 @@ function resizeChart(){
   }
 
 
+  const width =
+    chartElement.clientWidth;
+
+  const height =
+    chartElement.clientHeight;
+
+
+  if(
+    width <= 0 ||
+    height <= 0
+  ){
+
+    return;
+
+  }
+
+
   chart.resize(
-    chartElement.clientWidth,
-    chartElement.clientHeight
+    width,
+    height
   );
 
 }
@@ -323,41 +376,124 @@ async function getCandles(
   symbol
 ){
 
+  if(
+    typeof SUPABASE_URL ===
+    "undefined"
+  ){
+
+    throw new Error(
+      "SUPABASE_URL missing"
+    );
+
+  }
+
+
+  if(
+    typeof SUPABASE_PUBLISHABLE_KEY ===
+    "undefined"
+  ){
+
+    throw new Error(
+      "SUPABASE_PUBLISHABLE_KEY missing"
+    );
+
+  }
+
+
   const endpoint =
     `${SUPABASE_URL}/functions/v1/${SUPABASE_FUNCTION}`;
 
+
   const url =
-    `${endpoint}?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(DEFAULT_INTERVAL)}&outputsize=300`;
+    `${endpoint}?symbol=${encodeURIComponent(symbol)}` +
+    `&interval=${encodeURIComponent(DEFAULT_INTERVAL)}` +
+    `&outputsize=300`;
 
 
   const response =
     await fetch(
       url,
       {
-        method:"GET",
+
+        method:
+          "GET",
 
         headers:{
+
+          "apikey":
+            SUPABASE_PUBLISHABLE_KEY,
+
+          "Authorization":
+            `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+
           "Content-Type":
             "application/json"
+
         },
 
-        cache:"no-store"
+        cache:
+          "no-store"
+
       }
     );
 
 
-  const data =
-    await response.json();
+  const text =
+    await response.text();
+
+
+  let data;
+
+
+  try{
+
+    data =
+      JSON.parse(
+        text
+      );
+
+  }catch{
+
+    throw new Error(
+      `Invalid Supabase response (${response.status})`
+    );
+
+  }
 
 
   if(
-    !response.ok ||
+    !response.ok
+  ){
+
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      `Market request failed (${response.status})`
+    );
+
+  }
+
+
+  if(
     data.success === false
   ){
 
     throw new Error(
       data.error ||
-      "Market data unavailable"
+      "Market data request failed"
+    );
+
+  }
+
+
+  if(
+    !Array.isArray(
+      data.candles
+    )
+  ){
+
+    throw new Error(
+      "No candles received from Supabase"
     );
 
   }
@@ -377,59 +513,104 @@ function normalizeCandles(
 ){
 
   return rows
+
     .map(
       row => {
 
-        const timestamp =
+        let time =
           Number(
             row.timestamp
           );
 
+
+        if(
+          !Number.isFinite(
+            time
+          )
+        ){
+
+          time =
+            Math.floor(
+              new Date(
+                row.datetime
+              ).getTime() /
+              1000
+            );
+
+        }
+
+
+        if(
+          time > 10000000000
+        ){
+
+          time =
+            Math.floor(
+              time / 1000
+            );
+
+        }
+
+
         return {
 
-          time:
-            timestamp > 10000000000
-              ? Math.floor(
-                  timestamp / 1000
-                )
-              : timestamp,
+          time,
 
           open:
-            Number(row.open),
+            Number(
+              row.open
+            ),
 
           high:
-            Number(row.high),
+            Number(
+              row.high
+            ),
 
           low:
-            Number(row.low),
+            Number(
+              row.low
+            ),
 
           close:
-            Number(row.close)
+            Number(
+              row.close
+            )
 
         };
 
       }
     )
+
     .filter(
       candle =>
+
         Number.isFinite(
           candle.time
         ) &&
+
         Number.isFinite(
           candle.open
         ) &&
+
         Number.isFinite(
           candle.high
         ) &&
+
         Number.isFinite(
           candle.low
         ) &&
+
         Number.isFinite(
           candle.close
         )
+
     )
+
     .sort(
-      (a,b) =>
+      (
+        a,
+        b
+      ) =>
         a.time -
         b.time
     );
@@ -443,15 +624,14 @@ function normalizeCandles(
 
 async function loadMarket(){
 
-  if(!candleSeries){
-
-    return;
-
-  }
-
-
   showMessage(
     "Loading market data..."
+  );
+
+
+  setMarketStatus(
+    "● CONNECTING",
+    true
   );
 
 
@@ -463,21 +643,26 @@ async function loadMarket(){
       );
 
 
-    candles =
+    const normalized =
       normalizeCandles(
-        data.values ||
-        data.candles ||
-        []
+        data.candles
       );
 
 
-    if(!candles.length){
+    if(
+      normalized.length ===
+      0
+    ){
 
       throw new Error(
-        "No candle data returned"
+        "No valid candles received"
       );
 
     }
+
+
+    candles =
+      normalized;
 
 
     candleSeries.setData(
@@ -493,29 +678,30 @@ async function loadMarket(){
     hideMessage();
 
 
-    applyIndicatorScript();
-
-
     chart.timeScale()
       .fitContent();
+
+
+    applyIndicatorScript();
 
 
   }catch(error){
 
     console.error(
+      "LOAD MARKET ERROR:",
       error
+    );
+
+
+    setMarketStatus(
+      "● ERROR",
+      false
     );
 
 
     showMessage(
       error.message ||
-      "Market data unavailable"
-    );
-
-
-    setMarketStatus(
-      "● OFFLINE",
-      false
+      "Market data failed"
     );
 
   }
@@ -524,7 +710,7 @@ async function loadMarket(){
 
 
 // =====================================================
-// UPDATE LIVE CANDLE
+// REFRESH
 // =====================================================
 
 async function refreshMarket(){
@@ -537,15 +723,16 @@ async function refreshMarket(){
       );
 
 
-    const latest =
+    const normalized =
       normalizeCandles(
-        data.values ||
-        data.candles ||
-        []
+        data.candles
       );
 
 
-    if(!latest.length){
+    if(
+      normalized.length ===
+      0
+    ){
 
       return;
 
@@ -553,7 +740,7 @@ async function refreshMarket(){
 
 
     candles =
-      latest;
+      normalized;
 
 
     candleSeries.setData(
@@ -567,13 +754,16 @@ async function refreshMarket(){
     );
 
 
+    hideMessage();
+
+
     applyIndicatorScript();
 
 
   }catch(error){
 
     console.error(
-      "Refresh:",
+      "REFRESH ERROR:",
       error
     );
 
@@ -596,7 +786,9 @@ function updateSymbolUI(
   symbol
 ){
 
-  if(marketSymbol){
+  if(
+    marketSymbol
+  ){
 
     marketSymbol.textContent =
       symbol;
@@ -604,9 +796,11 @@ function updateSymbolUI(
   }
 
 
-  if(currentSymbol){
+  if(
+    currentSymbolElement
+  ){
 
-    currentSymbol.textContent =
+    currentSymbolElement.textContent =
       symbol;
 
   }
@@ -619,12 +813,15 @@ function updateSymbolUI(
 
 }
 
+
 function setMarketStatus(
   text,
   live
 ){
 
-  if(!marketStatus){
+  if(
+    !marketStatus
+  ){
 
     return;
 
@@ -634,6 +831,7 @@ function setMarketStatus(
   marketStatus.textContent =
     text;
 
+
   marketStatus.style.color =
     live
       ? "var(--green)"
@@ -641,11 +839,14 @@ function setMarketStatus(
 
 }
 
+
 function showMessage(
   text
 ){
 
-  if(!chartMessage){
+  if(
+    !chartMessage
+  ){
 
     return;
 
@@ -655,11 +856,13 @@ function showMessage(
   chartMessage.textContent =
     text;
 
+
   chartMessage.classList.remove(
     "hidden"
   );
 
 }
+
 
 function hideMessage(){
 
@@ -671,7 +874,7 @@ function hideMessage(){
 
 
 // =====================================================
-// INDICATOR MATH
+// MATH
 // =====================================================
 
 function sma(
@@ -687,29 +890,50 @@ function sma(
     );
 
 
+  if(
+    length <= 0
+  ){
+
+    return result;
+
+  }
+
+
   for(
-    let i = length - 1;
-    i < values.length;
+    let i =
+      length - 1;
+
+    i <
+      values.length;
+
     i++
   ){
 
-    let sum = 0;
+    let sum =
+      0;
 
-    let valid = true;
+    let valid =
+      true;
 
 
     for(
-      let j = i - length + 1;
+      let j =
+        i - length + 1;
+
       j <= i;
+
       j++
     ){
 
       if(
-        values[j] === null ||
-        values[j] === undefined
+        values[j] ===
+          null ||
+        values[j] ===
+          undefined
       ){
 
-        valid = false;
+        valid =
+          false;
 
         break;
 
@@ -727,7 +951,8 @@ function sma(
     if(valid){
 
       result[i] =
-        sum / length;
+        sum /
+        length;
 
     }
 
@@ -738,6 +963,10 @@ function sma(
 
 }
 
+
+// =====================================================
+// EMA
+// =====================================================
 
 function ema(
   values,
@@ -762,12 +991,17 @@ function ema(
   }
 
 
-  let sum = 0;
+  let sum =
+    0;
 
 
   for(
-    let i = 0;
-    i < length;
+    let i =
+      0;
+
+    i <
+      length;
+
     i++
   ){
 
@@ -780,7 +1014,8 @@ function ema(
 
 
   let previous =
-    sum / length;
+    sum /
+    length;
 
 
   result[
@@ -798,8 +1033,12 @@ function ema(
 
 
   for(
-    let i = length;
-    i < values.length;
+    let i =
+      length;
+
+    i <
+      values.length;
+
     i++
   ){
 
@@ -822,6 +1061,10 @@ function ema(
 
 }
 
+
+// =====================================================
+// RSI
+// =====================================================
 
 function rsi(
   values,
@@ -846,14 +1089,19 @@ function rsi(
   }
 
 
-  let gains = 0;
+  let gains =
+    0;
 
-  let losses = 0;
+  let losses =
+    0;
 
 
   for(
-    let i = 1;
+    let i =
+      1;
+
     i <= length;
+
     i++
   ){
 
@@ -862,9 +1110,12 @@ function rsi(
       values[i - 1];
 
 
-    if(change >= 0){
+    if(
+      change >= 0
+    ){
 
-      gains += change;
+      gains +=
+        change;
 
     }else{
 
@@ -879,10 +1130,12 @@ function rsi(
 
 
   let avgGain =
-    gains / length;
+    gains /
+    length;
 
   let avgLoss =
-    losses / length;
+    losses /
+    length;
 
 
   result[length] =
@@ -900,8 +1153,12 @@ function rsi(
 
 
   for(
-    let i = length + 1;
-    i < values.length;
+    let i =
+      length + 1;
+
+    i <
+      values.length;
+
     i++
   ){
 
@@ -971,6 +1228,10 @@ function rsi(
 }
 
 
+// =====================================================
+// CROSSOVER
+// =====================================================
+
 function crossover(
   a,
   b
@@ -985,8 +1246,12 @@ function crossover(
 
 
   for(
-    let i = 1;
-    i < a.length;
+    let i =
+      1;
+
+    i <
+      a.length;
+
     i++
   ){
 
@@ -1016,6 +1281,10 @@ function crossover(
 }
 
 
+// =====================================================
+// CROSSUNDER
+// =====================================================
+
 function crossunder(
   a,
   b
@@ -1030,8 +1299,12 @@ function crossunder(
 
 
   for(
-    let i = 1;
-    i < a.length;
+    let i =
+      1;
+
+    i <
+      a.length;
+
     i++
   ){
 
@@ -1062,32 +1335,44 @@ function crossunder(
 
 
 // =====================================================
-// PINE PARSER
+// PARSER HELPERS
 // =====================================================
 
-function parseNumber(
-  value
+function getSeries(
+  name,
+  context
 ){
 
-  const n =
-    Number(
-      value
-    );
-
   if(
-    !Number.isFinite(n)
+    context.vars[name] !==
+    undefined
   ){
 
-    throw new Error(
-      `Invalid number: ${value}`
-    );
+    return context.vars[name];
 
   }
 
-  return n;
+
+  if(
+    context[name] !==
+    undefined
+  ){
+
+    return context[name];
+
+  }
+
+
+  throw new Error(
+    `Unknown variable: ${name}`
+  );
 
 }
 
+
+// =====================================================
+// EXPRESSION
+// =====================================================
 
 function evaluateExpression(
   expression,
@@ -1098,23 +1383,10 @@ function evaluateExpression(
     expression
       .trim()
       .replace(
-        /\/\/.*$/gm,
+        /\/\/.*$/g,
         ""
-      );
-
-
-  expr =
-    expr.replace(
-      /\btrue\b/g,
-      "true"
-    );
-
-
-  expr =
-    expr.replace(
-      /\bfalse\b/g,
-      "false"
-    );
+      )
+      .trim();
 
 
   if(
@@ -1159,7 +1431,7 @@ function evaluateExpression(
 
   let match =
     expr.match(
-      /^ta\.(sma|ema|rsi)\s*\(\s*([a-zA-Z_][\w]*)\s*,\s*(\d+)\s*\)$/
+      /^ta\.(sma|ema|rsi)\s*\(\s*([a-zA-Z_]\w*)\s*,\s*(\d+)\s*\)$/
     );
 
 
@@ -1168,33 +1440,23 @@ function evaluateExpression(
     const fn =
       match[1];
 
-    const sourceName =
-      match[2];
+    const source =
+      getSeries(
+        match[2],
+        context
+      );
+
 
     const length =
-      parseInt(
-        match[3],
-        10
+      Number(
+        match[3]
       );
 
 
-    const source =
-      context.vars[
-        sourceName
-      ] ||
-      context[sourceName];
-
-
-    if(!source){
-
-      throw new Error(
-        `Unknown source: ${sourceName}`
-      );
-
-    }
-
-
-    if(fn === "sma"){
+    if(
+      fn ===
+      "sma"
+    ){
 
       return sma(
         source,
@@ -1204,7 +1466,10 @@ function evaluateExpression(
     }
 
 
-    if(fn === "ema"){
+    if(
+      fn ===
+      "ema"
+    ){
 
       return ema(
         source,
@@ -1214,7 +1479,10 @@ function evaluateExpression(
     }
 
 
-    if(fn === "rsi"){
+    if(
+      fn ===
+      "rsi"
+    ){
 
       return rsi(
         source,
@@ -1228,39 +1496,37 @@ function evaluateExpression(
 
   match =
     expr.match(
-      /^ta\.(crossover|crossunder)\s*\(\s*([a-zA-Z_][\w]*)\s*,\s*([a-zA-Z_][\w]*)\s*\)$/
+      /^ta\.(crossover|crossunder)\s*\(\s*([a-zA-Z_]\w*)\s*,\s*([a-zA-Z_]\w*)\s*\)$/
     );
 
 
   if(match){
 
-    const fn =
-      match[1];
-
     const a =
-      context.vars[
-        match[2]
-      ];
-
-    const b =
-      context.vars[
-        match[3]
-      ];
-
-
-    if(!a || !b){
-
-      throw new Error(
-        "Unknown crossover variable"
+      getSeries(
+        match[2],
+        context
       );
 
-    }
+    const b =
+      getSeries(
+        match[3],
+        context
+      );
 
 
-    return fn ===
+    return match[1] ===
       "crossover"
-      ? crossover(a,b)
-      : crossunder(a,b);
+
+      ? crossover(
+          a,
+          b
+        )
+
+      : crossunder(
+          a,
+          b
+        );
 
   }
 
@@ -1271,7 +1537,7 @@ function evaluateExpression(
     )
   ){
 
-    return parseNumber(
+    return Number(
       expr
     );
 
@@ -1279,9 +1545,8 @@ function evaluateExpression(
 
 
   if(
-    context.vars[
-      expr
-    ] !== undefined
+    context.vars[expr] !==
+    undefined
   ){
 
     return context.vars[
@@ -1291,159 +1556,31 @@ function evaluateExpression(
   }
 
 
-  return evaluateCondition(
-    expr,
-    context
-  );
-
-}
-
-
-function evaluateCondition(
-  expression,
-  context
-){
-
-  const operators =
-    [
-      ">=",
-      "<=",
-      "==",
-      "!=",
-      ">",
-      "<"
-    ];
-
-
-  for(
-    const operator of operators
-  ){
-
-    const index =
-      expression.indexOf(
-        operator
-      );
-
-
-    if(index === -1){
-
-      continue;
-
-    }
-
-
-    const left =
-      expression
-        .slice(
-          0,
-          index
-        )
-        .trim();
-
-
-    const right =
-      expression
-        .slice(
-          index +
-          operator.length
-        )
-        .trim();
-
-
-    const leftValue =
-      evaluateExpression(
-        left,
-        context
-      );
-
-
-    const rightValue =
-      evaluateExpression(
-        right,
-        context
-      );
-
-
-    const result =
-      new Array(
-        candles.length
-      ).fill(
-        false
-      );
-
-
-    for(
-      let i = 0;
-      i < candles.length;
-      i++
-    ){
-
-      const a =
-        Array.isArray(
-          leftValue
-        )
-          ? leftValue[i]
-          : leftValue;
-
-      const b =
-        Array.isArray(
-          rightValue
-        )
-          ? rightValue[i]
-          : rightValue;
-
-
-      if(
-        a === null ||
-        b === null
-      ){
-
-        continue;
-
-      }
-
-
-      if(operator === ">")
-        result[i] = a > b;
-
-      if(operator === "<")
-        result[i] = a < b;
-
-      if(operator === ">=")
-        result[i] = a >= b;
-
-      if(operator === "<=")
-        result[i] = a <= b;
-
-      if(operator === "==")
-        result[i] = a === b;
-
-      if(operator === "!=")
-        result[i] = a !== b;
-
-    }
-
-
-    return result;
-
-  }
-
-
   throw new Error(
-    `Unsupported expression: ${expression}`
+    `Unsupported expression: ${expr}`
   );
 
 }
 
 
 // =====================================================
-// INDICATOR ENGINE
+// CLEAR INDICATORS
 // =====================================================
 
 function clearIndicators(){
 
+  if(
+    !chart
+  ){
+
+    return;
+
+  }
+
+
   for(
-    const series of indicatorLines
+    const series of
+      indicatorLines
   ){
 
     try{
@@ -1460,44 +1597,77 @@ function clearIndicators(){
   indicatorLines =
     [];
 
-  signalMarkers =
+
+  currentMarkers =
     [];
+
+
+  if(
+    candleSeries
+  ){
+
+    candleSeries.setMarkers(
+      []
+    );
+
+  }
 
 }
 
 
+// =====================================================
+// ADD LINE
+// =====================================================
+
 function addIndicatorLine(
-  values
+  values,
+  color
 ){
 
   const line =
     chart.addLineSeries({
 
-      color:"#7c8cff",
+      color:
+        color ||
+        "#7c8cff",
 
-      lineWidth:2,
+      lineWidth:
+        2,
 
-      priceLineVisible:false,
+      priceLineVisible:
+        false,
 
-      lastValueVisible:true
+      lastValueVisible:
+        true
 
     });
 
 
-  const data = [];
+  const data =
+    [];
 
 
   for(
-    let i = 0;
-    i < candles.length;
+    let i =
+      0;
+
+    i <
+      candles.length;
+
     i++
   ){
 
+    const value =
+      values[i];
+
+
     if(
-      values[i] === null ||
-      values[i] === undefined ||
+      value ===
+        null ||
+      value ===
+        undefined ||
       !Number.isFinite(
-        Number(values[i])
+        Number(value)
       )
     ){
 
@@ -1512,9 +1682,7 @@ function addIndicatorLine(
         candles[i].time,
 
       value:
-        Number(
-          values[i]
-        )
+        Number(value)
 
     });
 
@@ -1533,19 +1701,28 @@ function addIndicatorLine(
 }
 
 
+// =====================================================
+// ADD SIGNALS
+// =====================================================
+
 function addSignalMarkers(
   values,
   type
 ){
 
   for(
-    let i = 0;
-    i < values.length;
+    let i =
+      0;
+
+    i <
+      values.length;
+
     i++
   ){
 
     if(
-      !values[i]
+      values[i] !==
+      true
     ){
 
       continue;
@@ -1553,21 +1730,19 @@ function addSignalMarkers(
     }
 
 
-    const candle =
-      candles[i];
-
-
-    if(!candle){
+    if(
+      !candles[i]
+    ){
 
       continue;
 
     }
 
 
-    signalMarkers.push({
+    currentMarkers.push({
 
       time:
-        candle.time,
+        candles[i].time,
 
       position:
         type === "buy"
@@ -1594,12 +1769,26 @@ function addSignalMarkers(
   }
 
 
+  currentMarkers.sort(
+    (
+      a,
+      b
+    ) =>
+      a.time -
+      b.time
+  );
+
+
   candleSeries.setMarkers(
-    signalMarkers
+    currentMarkers
   );
 
 }
 
+
+// =====================================================
+// PINE SCRIPT ENGINE
+// =====================================================
 
 function applyIndicatorScript(){
 
@@ -1616,29 +1805,22 @@ function applyIndicatorScript(){
   clearIndicators();
 
 
-  candleSeries.setMarkers(
-    []
-  );
-
-
   const code =
     pineCode.value.trim();
 
 
-  if(!code){
+  if(
+    !code
+  ){
 
     setPineStatus(
-      "No script.",
+      "Script is empty.",
       false
     );
 
     return;
 
   }
-
-
-  currentScript =
-    code;
 
 
   saveScript();
@@ -1648,37 +1830,50 @@ function applyIndicatorScript(){
 
     const close =
       candles.map(
-        c => c.close
+        candle =>
+          candle.close
       );
+
 
     const open =
       candles.map(
-        c => c.open
+        candle =>
+          candle.open
       );
+
 
     const high =
       candles.map(
-        c => c.high
+        candle =>
+          candle.high
       );
+
 
     const low =
       candles.map(
-        c => c.low
+        candle =>
+          candle.low
       );
 
 
     const context = {
 
       close,
+
       open,
+
       high,
+
       low,
 
       vars:{
 
         close,
+
         open,
+
         high,
+
         low
 
       }
@@ -1693,25 +1888,47 @@ function applyIndicatorScript(){
 
 
     for(
-      let rawLine of lines
+      const originalLine
+      of lines
     ){
 
-      let line =
-        rawLine
+      const line =
+        originalLine
           .trim();
 
 
       if(
-        !line ||
+        !line
+      ){
+
+        continue;
+
+      }
+
+
+      if(
         line.startsWith(
           "//"
-        ) ||
-        line.startsWith(
-          "//@"
-        ) ||
+        )
+      ){
+
+        continue;
+
+      }
+
+
+      if(
         line.startsWith(
           "indicator("
-        ) ||
+        )
+      ){
+
+        continue;
+
+      }
+
+
+      if(
         line.startsWith(
           "strategy("
         )
@@ -1722,91 +1939,42 @@ function applyIndicatorScript(){
       }
 
 
-      const assignment =
-        line.match(
-          /^([a-zA-Z_]\w*)\s*=\s*(.+)$/
-        );
-
-
-      if(assignment){
-
-        const variable =
-          assignment[1];
-
-        const expression =
-          assignment[2]
-            .trim();
-
-
-        const value =
-          evaluateExpression(
-            expression,
-            context
-          );
-
-
-        context.vars[
-          variable
-        ] =
-          value;
-
+      if(
+        line.startsWith(
+          "@version"
+        )
+      ){
 
         continue;
 
       }
 
 
-      const plot =
-        line.match(
-          /^plot\s*\(\s*([a-zA-Z_]\w*)\s*\)/
-        );
-
-
-      if(plot){
-
-        const values =
-          context.vars[
-            plot[1]
-          ];
-
-
-        if(!Array.isArray(values)){
-
-          throw new Error(
-            `plot(): ${plot[1]} is not a series`
-          );
-
-        }
-
-
-        addIndicatorLine(
-          values
-        );
-
-
-        continue;
-
-      }
-
-
-      const shape =
+      const plotShapeMatch =
         line.match(
           /^plotshape\s*\(\s*([a-zA-Z_]\w*)/
         );
 
 
-      if(shape){
+      if(
+        plotShapeMatch
+      ){
 
         const values =
-          context.vars[
-            shape[1]
-          ];
+          getSeries(
+            plotShapeMatch[1],
+            context
+          );
 
 
-        if(!Array.isArray(values)){
+        if(
+          !Array.isArray(
+            values
+          )
+        ){
 
           throw new Error(
-            `plotshape(): ${shape[1]} is not a condition`
+            "plotshape requires a condition"
           );
 
         }
@@ -1831,152 +1999,38 @@ function applyIndicatorScript(){
       }
 
 
+      const plotMatch =
+        line.match(
+          /^plot\s*\(\s*(.+?)\s*(?:,.*)?\)$/
+        );
+
+
       if(
-        line.startsWith(
-          "plot("
-        )
+        plotMatch
       ){
-
-        const inside =
-          line.slice(
-            5,
-            -1
-          );
-
 
         const values =
           evaluateExpression(
-            inside,
+            plotMatch[1],
             context
           );
 
 
         if(
-          Array.isArray(
+          !Array.isArray(
             values
           )
         ){
 
-          addIndicatorLine(
-            values
+          throw new Error(
+            "plot requires a series"
           );
 
         }
 
 
-        continue;
-
-      }
-
-
-      if(
-        line.startsWith(
-          "plotshape("
-        )
-      ){
-
-        const inside =
-          line.slice(
-            10,
-            -1
-          );
-
-
-        const values =
-          evaluateExpression(
-            inside,
-            context
-          );
-
-
-        if(
-          Array.isArray(
-            values
-          )
-        ){
-
-          const type =
-            /sell|crossunder/i.test(
-              line
-            )
-              ? "sell"
-              : "buy";
-
-
-          addSignalMarkers(
-            values,
-            type
-          );
-
-        }
-
-
-        continue;
-
-      }
-
-
-      if(
-        line.startsWith(
-          "hline("
-        )
-      ){
-
-        const inside =
-          line.slice(
-            6,
-            -1
-          );
-
-
-        const value =
-          parseNumber(
-            inside
-          );
-
-
-        const lineSeries =
-          chart.addLineSeries({
-
-            color:"#8e98a8",
-
-            lineWidth:1,
-
-            lineStyle:2,
-
-            priceLineVisible:false,
-
-            lastValueVisible:true
-
-          });
-
-
-        const first =
-          candles[0];
-
-        const last =
-          candles[
-            candles.length - 1
-          ];
-
-
-        lineSeries.setData([
-
-          {
-            time:first.time,
-            value
-          },
-
-          {
-            time:last.time,
-            value
-          }
-
-        ]);
-
-
-        indicatorLines.push(
-          lineSeries
+        addIndicatorLine(
+          values
         );
 
 
@@ -1985,14 +2039,35 @@ function applyIndicatorScript(){
       }
 
 
+      const assignment =
+        line.match(
+          /^([a-zA-Z_]\w*)\s*=\s*(.+)$/
+        );
+
+
       if(
-        line.includes(
-          "ta.crossover"
-        ) ||
-        line.includes(
-          "ta.crossunder"
-        )
+        assignment
       ){
+
+        const variable =
+          assignment[1];
+
+        const expression =
+          assignment[2];
+
+
+        const value =
+          evaluateExpression(
+            expression,
+            context
+          );
+
+
+        context.vars[
+          variable
+        ] =
+          value;
+
 
         continue;
 
@@ -2015,21 +2090,17 @@ function applyIndicatorScript(){
   }catch(error){
 
     console.error(
-      "Pine engine:",
+      "Pine error:",
       error
     );
 
 
     clearIndicators();
 
-    candleSeries.setMarkers(
-      []
-    );
-
 
     setPineStatus(
       error.message ||
-      "Compilation error.",
+      "Pine compilation error.",
       false
     );
 
@@ -2042,34 +2113,6 @@ function applyIndicatorScript(){
 // PINE UI
 // =====================================================
 
-function setPineStatus(
-  message,
-  success
-){
-
-  if(!pineStatus){
-
-    return;
-
-  }
-
-
-  pineStatus.textContent =
-    message;
-
-  pineStatus.classList.toggle(
-    "success",
-    Boolean(success)
-  );
-
-  pineStatus.classList.toggle(
-    "error",
-    !success
-  );
-
-}
-
-
 pineButton?.addEventListener(
   "click",
   () => {
@@ -2077,6 +2120,7 @@ pineButton?.addEventListener(
     pinePanel.classList.add(
       "open"
     );
+
 
     pinePanel.setAttribute(
       "aria-hidden",
@@ -2094,6 +2138,7 @@ pineClose?.addEventListener(
     pinePanel.classList.remove(
       "open"
     );
+
 
     pinePanel.setAttribute(
       "aria-hidden",
@@ -2127,10 +2172,6 @@ pineClear?.addEventListener(
 
     clearIndicators();
 
-    candleSeries?.setMarkers(
-      []
-    );
-
 
     setPineStatus(
       "Script cleared.",
@@ -2162,6 +2203,7 @@ symbolSelect?.addEventListener(
     currentSymbol =
       symbolSelect.value;
 
+
     saveSymbol(
       currentSymbol
     );
@@ -2184,7 +2226,9 @@ symbolSelect?.addEventListener(
 
 async function enterFullscreen(){
 
-  if(!chartScreen){
+  if(
+    !chartScreen
+  ){
 
     return;
 
@@ -2209,7 +2253,8 @@ async function enterFullscreen(){
 
 
     if(
-      screen.orientation?.lock
+      screen.orientation &&
+      screen.orientation.lock
     ){
 
       try{
@@ -2218,16 +2263,30 @@ async function enterFullscreen(){
           "landscape"
         );
 
-      }catch{}
+      }catch(
+        error
+      ){
+
+        console.log(
+          "Landscape lock unavailable:",
+          error
+        );
+
+      }
 
     }
 
 
-    resizeChart();
+    setTimeout(
+      resizeChart,
+      250
+    );
+
 
   }catch(error){
 
     console.error(
+      "Fullscreen error:",
       error
     );
 
@@ -2256,7 +2315,8 @@ async function exitFullscreen(){
 
 
     if(
-      screen.orientation?.unlock
+      screen.orientation &&
+      screen.orientation.unlock
     ){
 
       try{
@@ -2268,11 +2328,16 @@ async function exitFullscreen(){
     }
 
 
-    resizeChart();
+    setTimeout(
+      resizeChart,
+      250
+    );
+
 
   }catch(error){
 
     console.error(
+      "Exit fullscreen:",
       error
     );
 
@@ -2285,14 +2350,16 @@ fullscreenButton?.addEventListener(
   "click",
   async () => {
 
-    const isFullscreen =
+    const fullscreen =
       Boolean(
         document.fullscreenElement ||
         document.webkitFullscreenElement
       );
 
 
-    if(isFullscreen){
+    if(
+      fullscreen
+    ){
 
       await exitFullscreen();
 
@@ -2312,7 +2379,7 @@ document.addEventListener(
 
     setTimeout(
       resizeChart,
-      150
+      250
     );
 
   }
@@ -2320,26 +2387,28 @@ document.addEventListener(
 
 
 // =====================================================
-// INITIALIZE SYMBOL
+// INITIAL SYMBOL
 // =====================================================
 
 function initializeSymbol(){
 
   const saved =
-    getSavedSymbol();
+    loadSavedSymbol();
 
 
-  const option =
+  const valid =
     Array.from(
       symbolSelect.options
-    ).find(
+    ).some(
       option =>
         option.value ===
         saved
     );
 
 
-  if(option){
+  if(
+    valid
+  ){
 
     symbolSelect.value =
       saved;
@@ -2364,39 +2433,54 @@ function initializeSymbol(){
 
 async function start(){
 
-  initializeSymbol();
+  try{
 
-  loadSavedScript();
+    initializeSymbol();
 
-  createChart();
+    loadSavedScript();
 
-  updateSymbolUI(
-    currentSymbol
-  );
+    createChart();
 
-  await loadMarket();
+    updateSymbolUI(
+      currentSymbol
+    );
 
 
-  if(refreshTimer){
+    await loadMarket();
 
-    clearInterval(
+
+    if(
       refreshTimer
+    ){
+
+      clearInterval(
+        refreshTimer
+      );
+
+    }
+
+
+    refreshTimer =
+      setInterval(
+        refreshMarket,
+        30000
+      );
+
+
+  }catch(error){
+
+    console.error(
+      "START ERROR:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "Application failed to start"
     );
 
   }
-
-
-  /*
-    Twelve Data free plans can have
-    rate limits. This interval is
-    intentionally conservative.
-  */
-
-  refreshTimer =
-    setInterval(
-      refreshMarket,
-      30000
-    );
 
 }
 
